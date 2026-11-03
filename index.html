@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Orbit">
+<title>Orbit Tracker</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #07090f;
+  --surface: #0f1420;
+  --surface-2: #161d2d;
+  --line: rgba(148, 178, 230, 0.16);
+  --ink: #eef2fa;
+  --ink-2: #b4bdd0;
+  --muted: #8791a6;
+  --accent: #5ce1e6;
+  --accent-ink: #04141a;
+  --series: #3987e5;
+  --track: #252e42;
+  --good: #0ca30c;
+  --warn: #fab219;
+  --crit: #e66767;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, "Roboto Mono", monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(800px 420px at 10% -10%, rgba(57, 135, 229, 0.2), transparent 70%),
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: auto, 44px 44px, 44px 44px;
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 400 15px/1.5 var(--sans);
+}
+button, input, select { font: inherit; color: inherit; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 16px 16px 96px; }
+
+.btn { padding: 9px 14px; border-radius: 6px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-weight: 500; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { box-shadow: 0 0 18px rgba(92, 225, 230, 0.45); }
+.btn.danger { border-color: var(--crit); color: var(--crit); }
+.btn.small { padding: 5px 10px; font-size: 13px; }
+.btn:focus-visible, input:focus-visible, select:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input, select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; min-width: 0; }
+label { display: flex; flex-direction: column; gap: 4px; color: var(--ink-2); font-size: 13px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0; }
+.error { color: var(--crit); font-size: 13px; margin: 0; min-height: 1em; }
+
+.panel { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 18px; margin-bottom: 16px; }
+.panel::before, .panel::after { content: ""; position: absolute; width: 10px; height: 10px; border: solid var(--accent); pointer-events: none; }
+.panel::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.panel::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+h2 { margin: 0 0 14px; font: 500 12px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.panel-head h2 { margin: 0; }
+
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.22em; }
+.brand-mark { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 50%; position: relative; flex: none; }
+.brand-mark::after { content: ""; position: absolute; width: 6px; height: 6px; top: -3px; right: 0; border-radius: 50%; background: var(--accent); }
+
+/* Login */
+.login { max-width: 400px; margin: 10vh auto 0; }
+.login h1 { font-size: 28px; line-height: 1.2; margin: 18px 0 6px; }
+.login .brand { justify-content: center; }
+.login > p { color: var(--ink-2); text-align: center; margin: 0 0 20px; }
+.profiles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.profile-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; text-align: left; }
+.profile-btn:hover { border-color: var(--accent); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--series); display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* Top bar and tabs */
+.top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.top .who { margin-left: auto; color: var(--ink-2); font-size: 14px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+.tab { flex: 1; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; font-weight: 500; color: var(--ink-2); }
+.tab[aria-selected="true"] { border-color: var(--accent); color: var(--ink); background: var(--surface-2); }
+
+/* Hero */
+.hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.gauge { position: relative; width: 160px; height: 160px; flex: none; }
+.gauge svg { display: block; transform: rotate(-90deg); }
+.gauge-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.gauge-value { font-size: 34px; font-weight: 700; line-height: 1; }
+.gauge-label { color: var(--muted); font: 11px var(--mono); margin-top: 6px; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; flex: 1; min-width: 220px; }
+.tile { background: var(--surface-2); padding: 12px 14px; border-radius: 4px; }
+.tile b { display: block; font-size: 24px; line-height: 1.2; }
+.tile span { color: var(--muted); font-size: 13px; }
+
+/* Subjects */
+.subject { padding: 14px 0; border-top: 1px solid var(--line); }
+.subject:first-child { border-top: 0; padding-top: 0; }
+.subject-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.subject-name { font-weight: 600; overflow-wrap: anywhere; }
+.subject-pct { font-size: 20px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.subject-count { color: var(--muted); font: 12px var(--mono); }
+.bar { position: relative; height: 8px; background: var(--track); border-radius: 0 4px 4px 0; margin: 10px 0; }
+.bar-fill { height: 100%; border-radius: 0 4px 4px 0; background: var(--series); }
+.bar-target { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.subject-bottom { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.status svg { flex: none; }
+.actions { display: flex; gap: 6px; }
+.present { border-color: var(--good); }
+.absent { border-color: var(--crit); }
+.empty-note { color: var(--muted); text-align: center; padding: 24px 8px; margin: 0; }
+
+/* Marks */
+.mark-group { padding: 14px 0; border-top: 1px solid var(--line); }
+.mark-group:first-child { border-top: 0; padding-top: 0; }
+.mark-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; font-size: 14px; color: var(--ink-2); }
+.mark-item span:first-child { overflow-wrap: anywhere; }
+.mark-item .right { display: flex; align-items: center; gap: 10px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.icon-btn { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 6px; font-size: 16px; line-height: 1; }
+.icon-btn:hover { color: var(--crit); }
+
+/* What if + trend */
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.whatif { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.whatif label:first-child { grid-column: 1 / -1; }
+.wi-result { margin-top: 14px; font-size: 14px; color: var(--ink-2); }
+.wi-result b { display: block; font-size: 28px; color: var(--ink); line-height: 1.2; }
+.trend svg { display: block; width: 100%; height: auto; }
+.tooltip { position: fixed; z-index: 30; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; font-size: 12px; pointer-events: none; white-space: nowrap; }
+
+/* Dialogs and toast */
+dialog { background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: 8px; padding: 20px; width: min(440px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(3, 5, 10, 0.75); }
+dialog h2 { margin-bottom: 4px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.dialog-actions .left { margin-right: auto; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--surface-2); border: 1px solid var(--accent); border-radius: 8px; padding: 10px 14px; display: flex; gap: 14px; align-items: center; z-index: 40; max-width: calc(100vw - 32px); }
+.toast button { background: none; border: 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+.settings-list { display: flex; flex-direction: column; gap: 16px; }
+.settings-list .btn { align-self: flex-start; }
+
+/* Portal update */
+.steps { margin: 0; padding-left: 20px; color: var(--ink-2); font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+.steps b { color: var(--ink); }
+textarea { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; width: 100%; resize: vertical; font: 13px var(--sans); color: var(--ink); }
+.portal-result { font-size: 14px; color: var(--ink-2); }
+.portal-result ul { margin: 6px 0 0; padding-left: 18px; }
+.portal-result .tag { font: 11px var(--mono); color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: default; box-shadow: none !important; }
+
+/* Founder credit */
+.credit { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.credit > div:last-child { min-width: 0; }
+.brand-top { margin-left: 18px; padding-left: 18px; border-left: 1px solid var(--line); }
+.credit-photo { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 16px rgba(92, 225, 230, 0.35); background: var(--surface-2) center / cover no-repeat; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: none; overflow: hidden; }
+.credit-photo img { width: 100%; height: 100%; object-fit: cover; }
+.credit-role { font: 500 11px var(--mono); letter-spacing: 0.24em; color: var(--accent); }
+.credit-name { font-weight: 700; letter-spacing: 0.08em; font-size: 16px; white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .brand-top, .top .who { display: none; }
+  .top .btn { margin-left: auto; }
+  .credit-photo { width: 42px; height: 42px; }
+  .credit-name { font-size: 14px; }
+  .hero { flex-direction: column; align-items: stretch; }
+  .hero .gauge { align-self: center; }
+  .tiles { min-width: 0; width: 100%; flex: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Login screen -->
+<main class="wrap" id="loginView">
+  <div class="login">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span>ORBIT</div>
+    <h1 style="text-align:center">Track your attendance</h1>
+    <p>Pick your profile, or make one. Your data stays on this device.</p>
+    <div class="profiles" id="profileList"></div>
+
+    <form class="panel stack" id="unlockForm" hidden>
+      <h2 id="unlockTitle"></h2>
+      <label>PIN<input id="unlockPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" required></label>
+      <p class="error" id="unlockError" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="unlockCancel">Back</button>
+        <button class="btn primary" type="submit">Log in</button>
+      </div>
+    </form>
+
+    <form class="panel stack" id="createForm">
+      <h2>New profile</h2>
+      <label>Your name<input id="newName" maxlength="40" autocomplete="off" required></label>
+      <label>Choose a PIN (4 to 8 digits)<input id="newPin" type="password" inputmode="numeric" autocomplete="off" pattern="[0-9]{4,8}" maxlength="8" required></label>
+      <p class="hint">The PIN stops friends opening your profile on a shared device. It is not strong security.</p>
+      <p class="error" id="createError" role="alert"></p>
+      <button class="btn primary" type="submit">Create and log in</button>
+    </form>
+  </div>
+</main>
+
+<!-- App -->
+<main class="wrap" id="appView" hidden>
+  <header class="top">
+    <div class="credit"><div class="credit-photo"><img alt="A. Antony Bescki" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAUEBAQEAwUEBAQGBQUGCA0ICAcHCBALDAkNExAUExIQEhIUFx0ZFBYcFhISGiMaHB4fISEhFBkkJyQgJh0gISD/2wBDAQUGBggHCA8ICA8gFRIVICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICD/wAARCAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6PzQDSUYroOcdRmkFJQAu6lBptLigBetHSjoKBQAtFJ3oJoAXNGaTrRxQAUvFJRQAvWk+lLSd6ACiijtQAcUCil7UAFFJR3oAXpSUppOtABmkzQaSgBc0daSigBDRS4pMcUxBRRiimIfikpaSpKEwfWinUmKAEpcUtHagAooozQAUUoooAKSjvinBc9KAExSVDqN/p+j2Ml/q19BY2sYy0s7hQP8AGvE9W/aR0CDXhp+h6Hc6lbRtie7lkWEY9UB68euKaTYm0tz3IZpa8Gsf2h7CXU728vI4bXR0cR29uQWu5AVJMmBxtzx+NWNd/aT8PafYQtpmh3V7dzruQSOqIB7kFjn2p8rFzI9wYHtTQSDyMV4hoP7TPhS70+VtfsJdKukXICHzUk9lPBz7EV5x8QPjvfeIW/s/w9LcWmmOcu2dksmOwIwVHWhRbE5o+udueQQfpR0r4p0r4qXGmQQ3ejX99peoxMqmJ52nt7leB8yt09Se/avoLQ/jh4QvvCZ1PV9StrW+t28qeCIsxdv70a43FTVODQKaZ6pSE1Xsb6z1PTrfULGdJ7W4QSRSochlPQirB4NZlgTR70maKACkpfaigBKO1FFABRRRQAGkpTTcU0IfiijkiikMO1KKSlFAC4oo70ZoAKSnUnAoABWdrmu6R4b0iXVtbvo7O0iHLueWOM4Udz7VX8SeKdC8JaUNS16+S0gd/Ljzy0jeijvXxz8XPildeP8AWvLgaS20e2wtraFshmB5lcd2P6DirjG4mz0+X4+a3r2oz2fh/S7KGCVWWATSNv4P3mYfd+XnHT3rEh+P2t2F/efbIIW3MWgjSXcgOAF3MP4AcnaOSe+K+fludT80/Z90Qfg7G25HvU2Y0aLzWxKGAKEdfxrXkRlqeg+KfFmt+NbmK5vb+a91EsY4I52VI4Y8ZZ8DgZOcegHevONhOY02urY+Vu59RVjUL37DfNLZr5eU2yAdcHqB6fhWQ+oStIDGgTnOBVKyGom5MsEkH7pmeXbxg9u/4DHFZ5MtvkAAA5B/rU0RkSzE4ABAJJzjv1pl6xmiSZiFTAAH9TQFin9/Ejtnnv6VfnngEvmxkBSDwex7VRWW2MTR5IZiMGm3vl/YcRnduYAY9RTHuPWUm6XylDRluVPpWm+ppcoXktLaFowEQxR7eAOOB1PvWKge0KyOpZ5cYT2p7ugycFWP6UA0e2+HfjZ4k8OeCLDRIriBY7JCsWIt7NzkBienU/pXpXhD9oezvvPbxFKEjQqF2WpU4PDEkEgYOODivkHzZhkGQgEdD3rpPB9/dWWu2kVq4BvZVtpVflHRyAysB1FRyJktNa3P0O0vVrDWLNLuwm8yJxwcYP5VfPAr5H8IeMtR8L/E7UtF8O2MdvYASObGe5ZohsG/5Dz5Zxx3HPSvqjRNYt9f0WLUrZHi3Fo5YZPvQyKdro2O4IIrGUbFxlcvds0UciipLCkpaSgA70DrRRQAhpMUtHagB2aOtFA6UAHel70nFHegBaKKKAFFYviDxPofhm1F1rupwWMJ5HmN87+yqOWPbArUmnjhKLI4TewQEnqT0FfH/wAQ/Flpqt74r1K8voZtRmnbTtNg27zbW4baST0XIViO/wAxPpVxjcmTscp8UfG+peO/HV3eiZ0tIf3Vpbs/FvH6em89WI78dq4q4SOCDJYec33pG5P0AqtyZZhHkZyc98f/AF6g24kRsE5PQ/xVvaxCLdvd28SkOzMx6ccL9B61nX93umXeMLnI9a0LiWCxt1MoQzOCdvcVz08m9uOcnP0pMtK5YeWa6uCxbe3Qn1FX4bRIQfNH3hyM9PaqEIFuyyEh1I6npVkXEUwkE8rfeyoHcUDfkXZN08Z8hd8YGNint9KzpJXjhSKY9GyPpVQymKTfbysv6U65me4jWaQgseD9aV7jsMZ9h+U5K8D/ABqzZyq91Esn3U+bB796qQo0xKqu4qM0sTCKRmb7yggA+tIduhrPPHcajv43fcVe1MuwqbBuU7ayo5Sku/AznrU8svmPu4+npVJ3JcbErt5kgYdCcVJBdz2V1HcQSNFJE4ZHBwVYdCKpmX5FweQc0ksm9t3duTTuFjrvD/iG/wBF1P8AtVcXAYSRvvP+sDqVcZ6g4J5r6X+EHxX0i31Wbw7rG6xh1qZtQsbmaRfKBfCmMnsSyt1718oJLapZqE27iNpPc/Qf1NesfDbw3Z3Oh33ibxPbSTaUtjLBCjDkbsqGj7Eqx6ZzznBFJxTMtVqfbhBBpK4H4MarqOs/Bvw/earI0t0ImiMrHJkVHZVY++AK7/Nc7VnY2EzRR1opAFJS0YoASilxRQAZopKKAFopKWgB1BBxxTc0p+YYJIoA+fP2hvHV5pFxpXh7Tb57aRo2ursRHDcnbGM9ujH8q+XLtppJmJYlVG/aWzgnrXpn7RwurT4xX3mMSk9rbvEyngqE2/nkGvIrW6/0hTKdo6Fie2K6I7Gdr6kjBo0MrNhn6c9KkkkiVVlMoVlX5QBwB/jUBmjuJDtkVmP3AR0FJ5E1zJhBuQcHFVcdihd3HnyF3be57jjFV408yUL0zW1Lp8MWWOM+npUMlklvEo3Yd+cd8VLLUkMkWMadhXDYJANZxYYwOlW2t2B8sZxUcixJ8iKM92NIaKpx3pR0IpWUjnHFXbOwe5nEarlhyR60ilqR2Mghld++3AFVWJZix6k5rU1DTJ7OTZ5ZAbkHFZbBlOGBBHrRe43Fp6iU9FLdOKmgtXlG5gQv86n+yFGyA34imnYTRSYHdjIJ9qkmRIwij7235vrVjyHMgjVTk88jFFxZypH5hGTTuhWZWiVmcBRz79q910DWdb1D4Xy+HtD05re3tw091crIzrgfeZyQI41HUHJPTArxrRZo4b+NzdzWTg486MZwD2r0bwuH1XV5rWOe91yFFVkS8cpbRvnlnjBzMQcbUA+Ynmml1MZ66H1n8FJ0n+DmgBI9githHj1I6n8SSa9BrnfA+gt4Y8C6Torsxkt4Rv3KAdxOTkDvzXR1zy3LWwlFLSUhid6Wg0Z4oATNFFIaADNFFFAC0tNFLQAvalHNNzTh064oA+Vv2rNERb/w7rqIqyXMctqwVeTtIYEn/gRr5kih3XKLIfkY4J9K+qv2pr1Wl8M6b/GiT3HXsSq9PwPNfNTGKKHMK7p8ZLj+Gt47ElI2bWZbAzLnA4zgVYV5tO0/zGl+djwg5x3pXLCGGdWG5Mjce2RmqtzFlchSUDcM3pVD3JkuZi3nTJ5m7rxwKYjb5zOzEuThc1qFUjje32KST5iFuh6VH9lUuyx4UE5APp7GkBRdliiP8RHX61VZQI3JxluavTW8iq8Zj465B61FLZqIFMUhY8ZHpSGRmLeigKORxW/4Usy+qIHwWDCqEdm7XYjQMVxtwBnFdv4X0R7HWZI7gEFUD8jp3BrGtNKLOihBuaZ2k/gy2vbQM8IweQ3vXJ6n8MnAMiLuXPFe36RA02mR+cpDsM4Iq3Npe5eOB0xivnFi5we59R9Wpzjqj5t/4ReS1Uqyn5eh7VkXUcMEhSaNg47Y619CahpMWGzGCufTpXI6l4bsbo7pIdxHpxXoUsbzfEcVXA2XunllhZLPMJ2TEa8AHvWvJpaTR4VBj6V1aeG4OREPLCjGOxqymjqibSBn2NdyrRbPPlh3FanKWPgi+1KbTo9FCyXcsjq8bRbvJUdWOMkryD06mvrr4W/DrTfAvhaO2EQm1CVvOnuZI1DlyBkL3VR0A/xryf4baxb+GfEgW7CR2d7thmlI5Xn5TnsuTyPx7V9NAYAxW3NdHnShyyEwBRjinU01JInSm80pNJnigAooooASg0GkoAKKXtSUAL2ozRSUAKaDQKCQBzQB8eftK3M7/FZIJT+7ttPhEOfRizH9a8XuZUgsvMhAOVCv9TzXtP7SkTj4l20isknmaegJXqPnfAPuBj8K8TMLG38l1JAUsPrjiuhbErcqIJWUoQWL/N6YFWZvL8mO0jyVzvZie/c1VlklV1JX5nG0D6U+Bh5jEtnG0ZPegqxpTGeCBAxB+Yn6ZFAicWy7svMc7dp/Gr7OjW+Nh2lQQxHTpVXZK0rPGjO0a7vl4249aVyrFdJHiLtIMHG3BHIrR06xtrqKQkPFMvRxyr+3tUllHDdSZZwUdeQw5BrURLW1hMaAE8EbT97nmspSdjWECTQNNnuteSCNQjfeMuOoHevbvDPhAT6m+t3KFojGsMKnvjqx+przjwn9kj1Hzb2ZInlddoOB8uea+krEW32OPyNvlhRt29Me1eJjasr2R72BpxtdlNbJFX7o49qmW03ISRir4hO7LDIPPNZOt6tDpVjJI4ZiBwFryUrs9a9jmvE95peiWjXOp3EcCdgeWY+gFeP6n8UNODOlppcjleAzMB/KrPiC+h1O/a4unluXJ+RHYEJ9AKxm0rULpc6f4dvbtjwDBZO4P4gYr2MPQhH4lc8nE157RZz83xBvxMzkLGuc7QKltPiMrvsvFZB/eVc0a14Q8W2iwNf+Gr2xS6fy45LqLykZj2yf5VmQeDrWBUn1e9cB2YJDbKMvtOCQT2yCM4r2IU4vZHizqy2bO40/xLYX8TCO4WYKMntkelfTHwi8e2ni/wAOvpb3KvqukBY5Vz80kX8En/sp9x718lL4T0+PSnvtP+02ZCneTLvIX1K45/A16F8Axquiatq8ulPpkuoXkaRyXF9I6Q2duDuaRumSxKgDOSQfrWsoJLQ5ZTvufXeKYa8j8Q/Ee+0FFk0/xPoHiW4VgJbO3R42A7lWBYcfWu+8I+JY/FvhW012K1a1W43AxOwYqQcEZHXmsrO1yU03Y3TSUUmaQxaSlpKADtSUUUAFFFFAC4oozRQAZoIyKMUvNAHhH7Quh6PD4Rm1u4hsUvn8qKGUwnz2PmDcN2cEBe2M9a+SrpHcsA24oF29vlr6o/atNwvgbw2VVjB/aMm8jpnyjtB/8er5RglVYiSzBuAo9a3hsTbUgRVFwNx3BQc/ianQxxeVCqbyrN0HWq4j3SyNnYC278Kt2sW6fzOidTx60Fo21ljOnBCu9o0zx6//AKqzkv8AyCJkJVMcjru+teg+DfAUWu2Fxrut350nQIWIMuQrSkdcE8Be2fXpT9Ts/g6bhLDSb66MxOFnLs0RbtksMHn8K5ZV4p2Sud0MNKS5m7HLaLo8N6Fu9Y1y28O6fcZ8uW6V3ecj/nnEgLMP9rAHvW9Y+HvDcUD3M2ra/fKDmP7Jo2xTzgndLKv8qdbaHZeWQry3GoscSXE/zZx9woew9vSrAF9pMYh1S1lkg371kVjjPcfjWTrReiZsqEokiroUFwmdE8QXOzp5kltGD9SN+K9f8O6n4ivbdrXSvDqQRQKATNqoJHp92GuF0650q9liNsotmwCJGA3H2xmvX/By6cWluLN2DTKFdSMA7c8/XmvNxM+jR6GGjbqUbkeM+CLOxj2dS17NIxHtjaK4XWvEWuWErRXnhi0uTg8kmQj/AL7LD9K9rvIQWKqevOa52+0OK8D+Yo3Y4NcMK3I9UehKkprRnitp8UfGWlK9vZ2+nWMGcrnTIncfiFUH8qztR+OHxOV2SPxMiRjoE0+IY/NTXqOo+EVZSu1SoHpnNcPqfgq2jDEwKD1ytenSxdOWjR5tbBz6M86vPiH4z17xPbajrHiCe+lRHhRZFVY41ZT91QAFOcHIGa300xIPE509m+1LaQRRKxHXagz+pY/jWbqmhtbu/kQbioOOOa6bSJ4NQkm1O3/eSSNufHVT3UjtivS9suX3TzPYPmtI7FLDR5vAniG4ziWytTsXb1dl4wfqRTvg34Ug1LxHqEfiKytb2OSFHjidfkGwBfu9MgfnWXFcR3Sv4fSVVa/uUmuIw3zRQRfN83oWfYAPQGuoS5udGvYr7SpxDPFgo6/yI7g9CK5/rDi+V9Td4NTi5Loeo+LfD/h6y8HXNnp+jWdl5kkXMEKqeHB69a1/BunQ6V4F0iygTYiQBuepLEsSfzrjtS8UDxfYaTY6VAzajcuTcW6KW8jaCMk9lycgnsK9NihW2tobZDlYkVAfUAY/pXWneJ5DVpWClpKKAFNJRRQAUUUUAFFFFABRRRQAUopKdQBwvxc8IP44+Fer6Nbrvv4VF5ZjH3pY8sF/4ENy/jXwAxAQs3DYxg9vav07RirBlOCO9fFn7RXw7HhTxuPEulw7NH1x2l2ImFtrjq6cdm5cf8CHatIvoB5AuyOKKV/u8oQe4/yalsftEV2BD86PhUbHGTwP51mu7NEY25Hat7R4ZLq3jSD/AFgcYX3HIom7Rua01eSR6p4+jnuNX0bwJanZp1hao3lrwJZCvUjv0/U1xF14Lu5b/wCzpGYkT/WNjAX8e1eh37C9+KHh3UCjZvIYwc/3gOR+FcV4vudT1nxHqGm2rtHbxsd0a8bseteVSk7pHv1YRSvY0bG+hsptOubaUXAaRoSynKlkIUkHuDxXtKabBfaY6zQAiRPmVhkjNeDeHb77Drfhm1stPe8htZRFOxXKb5ZBnt24x9K+mree0e8vLNHVpbeTY3Y15uNvGSaO/CWlFpnjcPh2z03UmZshEfAi7P7/AFFep+E9TtjaCOBPK8rgpjGPeuc1kRwa7coYk6Bl3H5enrWbp2oWNnrMdw0rRrIwVgGO0Z9R9alt1Y6kKKhKx7PHcLIoYsMdqY7xgF/yFYkN5sI4BXsasT3imLbn5j7VxtnWtdiG+lyTyAfSuW1JkY7Mgcc4FaN3dkEkEbulcxqV0G3E4GBWlNXYTasc7qsJ3NtVSfWuG1JLqGSS5j2wyDvF8pb6kda7G9vVLFCegNc1dL9pmRcZLHoPSvbouyPJrK70PRNO8H+HbDS7PxFHdGS0u7ZWlEj5YPjJJ9ec1zPiPxtomjsI7a5Vieij0rGuNN16Kwks7G/UWsnPlSZ+X6EVwl1oZhvClykZmP32b5vyzV0qSnK8ncxr1pQgkkfSPwS8R3eo+NlgsyTbTWkj3IU/KVGNp/BiAPqa+iG5NcJ8I/CHh3wx8PbK90O5XUJtWiSe4vgADIccRgfwqpyMeuc813hruSsrI8OcnJ3ZHRSmkpkBRRRQAUUUUAFFGaKACiiigApRSUUAOFeZ/Hbw1N4m+DWsQ2UTzXli0d/HGgyX8sncMf7jMfwr0ynIVDjzFDIeGU9CO4poD8vchgAOSa6PSmkgiRYciYNkYpPGfh2Twt8SNc0B4zGtpeSLDkYzEW3RkexUiptLuILe/iZ2DbSD706j906KPxI9ghtby70PSryBA2raay3EadPMx95M9tw/Wsx9O0HxJ4luby11j+y/tjAz28sDGSMjhlGO9dDpDNPBDPbyMDgEcYyK6bRtD0fV9eGoTwrb6nGuCo4Wb/aNfNutytn1vsuZIx5rHRfB9iun6ez3cN2UeKaMqZYpFI2kg4HXFP0q9mtfECR3hxd3MZklUkFg2c/NjvVfxto9xeavb2psvKBkCtJGcnb61TvY9F8O+PdH0m0jUGa3b5u5bPf64NZyj7SN92OMuSVuhveKFk+1JPwI5F+asqw0j7XbysTE8agn5x0J7g/41t+JGD2CFcFk5Kn0NUdMvpbcqXdQhwHAbjGP51nBvkTQpr32W9InurezLMzuYGKsScg+h+lbcuoRPbIytww3KQetUrFlWGR9pOHKgA/eFUp0XJKEqCThc8AVDs2WtBb28wGbj6A9a5TUbksrHoOc+tT6lcPHKpAIyMexrGupZHXaW+tddKBjORnzSB3JJ69cVLp8CtciaThU5Ge9QyKD64FVNQvTa2blW68AZ616CV9EcUmkrs17vXbWHMaOp9xXI6jI93K82VRSfvPWI0upX11i2i2qOrkcCraeH57iUG81gDjoImIFdtKmobHm1qjqKx7x+zv4qu4Ndu/CMl0bnTrqNriBW6wSoAW2j0YHn3Ar6TY8181fs8eFrKz8X6lqcuqJdXFrZ/uYljKcO21mOTzgDH419JnrW8tzzWJRRRUiDvRRRQAUhpaTvQAoopBS5oAKKKKACiiigB1BGRSCgntQB8vftQ+DWiv9I8d2sWYpEGn3mB0dcmJj9RuX8BXhWgxW76upkUFSMgHsa+7/AIhaVb658MPEemXMPmrJZSMi9xIo3IR7hgK+HPDOlLdakcvhoX5BHU0qj/ds6aGtRI9o0R40hhQY2lRyO9dDJaCYZRmV/wCFlOCD9a5izRI0jQZBXHIrsLNsxrycV8jW0dz7SlqjkdbfxVDE8lrNHdlBnDqQ6j8OteTw3Ws33jq01DUN8lzHKBzwRzX0VcQq37xMbq5LV9Os47pbiaFFm5CyKMN+ddWGxCUXFo58RQcmpJlfUNUNyYhEXSYcZPFVLeW4Dl7mMOj8FlOQ34dqzfNEt+beaRRIATEwHBI6A+9QG+dIgImKOh+cdjz2rZQ0sYOetzsbO72I0Zdj5eCOcYp897HKsablBUnJNctb6j5pceYqkLycdRT0v0l44BAxk9c1m6TuaKehpag0cjAl1VVHPvWHcOCdw7jip7mcNFt3LkCs6WQeXgctW9OLRlJlW6uljAGfmxWFdsblxvOR6VpSwtIx45pF0uWXhe/euyLUTinFy2M43y2lv5cSgY9BWZca7Mg2oxH4V00ugiOImQ5Pc1jXGhwsWfJyBmuyk1J6HDXUoI96/Zp0/ULsax4ouU22nlixgbGPMfcHf6gYUfU19DHrWR4Q0ey8PeA9C0ewQJBBZxngfeZlDMx9ySTWuTmtXuecJRRRSEFJ+NBNFAB+NFB4pM0ALmikxzS45zQAvajmjNITQAtFJzR1oAWigdKAKAI7q3jvNPubSUfJNGyN9CMV8oeIPBY8O+PGlihMcFwm9kXkbujfTnn8a+tVOK8r+K9hAdX0ibbtmeJyQP7oIAJ/GuevLlps7cHHmrRPNbG2UAsQcdjW/YttOOlUtgjUAcD2FOjOyTcD1r5ia5j7CHumxK3yl8ZAHFc/qhSa3IaLfz1PatE3RVArk5IrLuXVhjqD2qKaaZU3dHHXdrdw3aSQlSBnlhyw9DWBcmaGRsocMcknqDXYXkBXlDxnPNc9fK7IwkXhR37169GdzzKkLHMvdPDIz+YRJ6Z7UqatIGVvNHpz2qC7tndSR0yee9Z81ldw2sd20R8hyVWQcjcOqn0PtXoKKZ58qkos6KPVs5BkBBOaeb9W4VxxxXFPNIDndj2pyXrxj7315qvYoj6y+p3MFyhcAnJJraiu4ViBJHHbNeYDU34+fp71MdZuCu0NUvD3KWLSO71DV4VXAIbuBWAL8zuUVAzP8qgdSTwB+dc8txI65ZiSe9eyfBH4b6j4m8TWfiLUbVotA06UT+bIuBdSKcqieozgk9OMVtSp8hyVq/OfV9jBJaaPp1pKcyQW0UTZ9VQA/wAqnPWnSEsxY9aZWpwBRRRnmgQlFFHegBDzRjFFITQIcelFHWkoGFLSZpaACiilVWdgqKWY9AKADIpVBY4AzU8kdrYxedqNwsYH8APNUI9QutYuvsuhoIoV/wBZPjhR7n19qxlVS2NVTb3NO3s5JJlVlwg5bPpXinxI1Jbv4wX+mh/lstOttq9huLk4/SvfLGwg0628mEu7E7nkkOWkb1Jr5H8cas0P7TuvRSf6u4t4LZMn+JY9wH4jNcle9SDSPQwfLComacxJIznA68VCz7cBDj39KsO+Y9ynK+lU5TxkcEV4W59ONaV8EnJzxmopyuwMpwaYhL5yxxmleTaOnTuaqxNyhMFYMGU56ZFZl1ZefGFwdoPTua1JpF4YPjNZk92yMSHHAzmuimn0OebRi32noo3A456e9c/DdiKe60VypttR2xMW/wCWcoP7uQH1DHB9mIrW1PVg0Trv4z6Vwd9cM8zShhuXkYPcV69CMrankYicdkZ11LKkzxumxkJDDHII6iqhmIGSTW74wtxb+NdYhV9yi5Zs4x975j+prFigje4hSTo7hcV6EVoeVJjtsyxxTSQyLFL9x2UhX9cHvXSeG9N0m/1OFNa1GS1s8jzDbIHk2+2cCvXjo2k6h4Vi0K6tVNg8SmHb96FsdQfXNeI63o1/4Y1drK5y8RJMNwowJF/ofUVSRnzXPsH4deEPgYtvA+m2seo34IIfWPmct7KcJ+Qr2h1WKNYkjWKNBhUVQqqOwAHAFfnVpGrS27IfOYn0LcV7r4F+JWuWSJCurNNCODb3B8xB9AeR+BpOJDn3PpphxUZPNc5ovjTTdVjVbn/RZW75yhP17fjXSFcqHQhlPIIOQayGJQaOfSjmgBvWjBpaKYCAYNIaU0lAC5pKSigBaWkGTwBV+Cx48y5yq9kHU1Lko7lKLexDa2c1y/HCDqx6Cn315Fplq62iZk6Fz1NOu7hxH5aHy0HGF4Fc1fXaQqXYkn1DVyTqOWx1QppasrWPh698R6m1xqVw8UCnLBepHoPSvRbW1trG1S1tIVhhQYVVH+cn3qloSypo0Mlxu82YeaQxyVB6D8sVpHp1qEDY2RsISOoFfCXxiedvjD4qvLIkXdrPbzRH0KRKf1BI/Gvuec4hfB6CvhjxlMl18XfGrOQxF8Ex7CNRXVh480miKjcYprudD4b1+DxBosF5bkDzB86D+Bu61tyQnbg14bourTeEfFUqKpaynO5o/Y+nuK92sbmDUrOK4hYPFIoZWBrw8bQdGd1sfTYPEKtDXcZDaqVbbjJ4xVS+jwuFX61fw0Up28expLkI8BXqfU1wqWp2yWhxN87RtjsDyK5y/wBQKhsda6HWlKM20cDpmuD1CcgkN19a9uhFOx5FeTiZGpXzO5BP4Vkxqbi4ji7yME/M4qe6O+QkEnNXfDNqlx4t0mKUgRi5SRyegVDvb/x1TXqJJI8aTbeozxs7Dx/ryzH5o72WMn/dO0foBXMW9yWvkmY4RGGPbmrOt382pane6jKSZLyd5m+rMT/Wm20CRS28cgBzIgfP1FbxWhzSZ9MaGguPD9u3Uoo/AVR8SaFa6tZva3MO+JxnOOUPqD2Ndj4V0I3Hg2O/t3UyRgI8eOq4GDRPYrKhwMkdRWSlqQ4tHzPqWi33h++EFwC8Dn91MBww9D6GtnR7gxTLIHIIr2m88N2mqWUlleQ74346cj3Hoa8s1Xwpe+HtT+zTZeFuYZh0kHv7jvWikmFj0nwvrE2I/wB5uB9a9c0LXLiJdkczBP7p5FfPOgzyW7okqsyA5Jr3Hw9p17dWsU0EBeNuj5GK55yUWaRg3segR6xKyhnhSRf9g4NWY9XtH4dXjPuM1kW2l38KgAJj/eq4dMnZCzRgN/snNQqke5fs32NUTW7AFZlP14qQLnpg/Q1zgilgfGGBqyk2fvYzVcxHKbDI3oRTMc1USVwPlmdR9c/zqQ3flRl5lLoOWKDkD1xTUhOJbjt5pWwiMatppkhI8yRV9s5NXWkYnaDhR2HAqWGPJDGsHVb2NvZJLUSG0htlD43N6mobiUnNT3MhAPtWXdTFUPNYyk2zWKMzUbsRRls9O1cxbJJrniKzsBkxO+6T2ReW/wAPxpdf1Da3lh9vetf4c2JeK91yQcOfs0J9QOXI/HA/4CaEtC29DvR97AHHoO1PNMUEc0SMAetBkU9SkWGwlkYgKqnkV+fOr3WoxfFvxONUtJbSe6vDMscoKttJwp57EAV+gGpTeTaO20F8ZAPrX58eO9TlvPjlqc0nMibUbnPIH/167cI/eZlW+Ef4k08XNmZo0/exHcuO/tWp8PvFy6cxsLuQiGUjaxPCNUyqrw4PzZAzXHapZHTr/wA2MZhkPPoprfFUFVhqVha7ozuj6Be4E65yOO47ilO2RMcrxmvL/DPillCWV/LxgLHKf/QTXp+ntHOAQc55Ir5CrRdJ2Z9bSqxqq6OS1yF1BbkjGea8x1Zv3xUV7J4ijxbvgdPSvJr6Am7KlQea9XCSujz8XHU50W7ysAFOa3NKs30+21PUWIDRWMqJ6h5MRg/k7flWzp2mKwDbOvtTvE32fSPCJMjhHvbjgHqyRrwPxaT/AMdrujU5pcqPOqUeWHOzzJbYfaC8i/u4vmIPQ+g/Oq11uEDOD8wIYH3zQdXdpCksS+WTxtHI+vrUj4kjwuCpHB9a9OKVrHkSve59l/By9TUvBNvMpys9qCV9GHBrpLjQ1uJHlh+R8/dPRq8p/Zh1ZbzRL7RpGHm2MrbQeux+R+oavdlj8q5MZB6nNeXNuM2jujFSijFsPD9s2GuUdT/dz3rO8V6J4ZOlm31NlgRgTGxb51bsyjvXoiwxtb7WT5uob0rzzxT8OJtema6j1W4SJ/8AW2qHa0n/AG064/2eBShK71Y5QstEeeeGvCc+uvKliyeXARumcYB9MV7R4e0htB0xbRbl51ByQRx+FWfCmj2+l6BDZxRKjDJcDqD6H8K23tRsLIOlc9Wbbsb0oKKHQ7SoYHOanyIxknPtVK3bD4A+uavtGJo8jlu3+FZJlyQgMUxyQM+hqVIYf+eS5+gqgG+cqV2sv3hViOTJ5NaqT6mbRb8kYHyr9MVGUQHJUflT0lBAB5qOWRQOKpMl2NCNCW5FWyRGnWhFABJrF1vVEs7dzu7UtidyW4v4Vk8ssGb0rO1VjDZGQjGRWf4fhn1K6N7NkAn5QfSp/Hl4tppDLnBxiktWU2keTeIdSklM/kENKAdueea9H8HeN/C8fhDTbZ9Rt9O8iJYnS5lVGEg+9nJ7nJ9815Xp0bXd2X27izYAxnNeo+HvAGkrG17rGjWkjSAYWeBXbHvkcVrLRGcdTvbXULO/gE2n3UN3G38cMgdfzFSFjk5wTVSzhs7OFbaxtIrWBPuxwoEUfgKsKuSWA596yuVYoaipNrMzv/Dnmvzd1W7F38XdYugdyNeygEegYgfyr9HddlEGh3ch/hjY/pX5r6ejz6vd6mw/1kzvke7E16GEW7MK7sj0O3l+QBep9aW9s4ruBo5F3KRzVG0ZWjyrZJHUVdl1KzsLFrm/mEUSDkk/ePoB3r03scdzAttOaK5NnIOVyVJ/iHrXpPhDUyDHp16SrjiOQnr7GvGZPFd1rHiG0jtFFpbpJuTPLNx3Pb6Cu707XtMvFUmdLafONrNgMQeoNeJjMPzp2PbweI5HaTsepa5bsLcvwVIIryuWzZ9QK46mu9tdaa+tBa3Um5h9yQHIce/vVD+zFF35h5HXFeRRcqKcZHsTUatmg0rTCY8OOB2rgvjdHaWetaFpsIYT29kWn/u7nbdx79j9K9o0e0E9zDERhd2XI7KOWJ9OAa8L+J6PrfjK7lguFlMUjSPmQbQGCkBR9OPwrvwF5zcjzsxahBRPLX+8cVYtblom2tyn8qZcKqTsikELxkd6v2emuUE0oxn7or2opuWh4Tatqer/ALO2sHSfjVYWbviHV4pLUjtvxuT9Vx+NfZWowGO8R+gYc1+eNhfXfh/XNP1uxYrdWFwlzGf9pGBx+OMfjX6LteW2ueGLDXbHDW95BHcxEHPyuobH4ZrixUWpqR0UZe7YntiPLC569DVwQ/KcdTVCxcOozXMeLfH934f1uLQbDQnkuJIxL9tum2wKhIXcAuWbBPTiuSzbsjp5la5095azqDLbOYZuzgZB9mHel0PVDqMc8VxCIby3bZNH1H1HsawbDxp9uMMUlvBMoEZuJoS4ERdAwVRg7n55XOR3qSaSOw8T2uq2sge2uf3ExGeCPX0P+FNx0EpHQXtubdxcDJUn5h6VPAchXQ9ecVeMaSwlGAKsKybfda3b2rn3Q+orBx6mqZPeW7Tx+fAMTqOB/e9qzra6juASCQyHDoeqmtqNvMyy8Y6iuc1+0nsnGtWC52f6+P8AvL61UddBPQ11k+XIGRUMjkggHk9qjsrm3vrZLi3bKMOR3U+homQj5getUtxPU//Z"></div>
+    <div>
+      <div class="credit-role">FOUNDER</div>
+      <div class="credit-name">A. ANTONY BESCKI</div>
+    </div></div>
+    <div class="brand brand-top"><span class="brand-mark" aria-hidden="true"></span>ORBIT</div>
+    <span class="who" id="who"></span>
+    <button class="btn small" id="logoutBtn">Log out</button>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="attendance" aria-selected="true">Attendance</button>
+    <button class="tab" role="tab" data-tab="marks" aria-selected="false">Marks</button>
+    <button class="tab" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </nav>
+
+  <section id="tab-attendance">
+    <div class="panel hero">
+      <div class="gauge" id="gauge"></div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Subjects</h2>
+        <div class="actions">
+          <button class="btn small" id="portalBtn">Update from portal</button>
+          <button class="btn primary small" id="addSubjectBtn">+ Add subject</button>
+        </div>
+      </div>
+      <div id="subjects"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>What if</h2>
+        <div class="whatif">
+          <label>Subject<select id="wiSubject"></select></label>
+          <label>Attend next<input id="wiAttend" type="number" min="0" max="500" value="5" inputmode="numeric"></label>
+          <label>Miss next<input id="wiMiss" type="number" min="0" max="500" value="0" inputmode="numeric"></label>
+        </div>
+        <div class="wi-result" id="wiResult"></div>
+      </div>
+      <div class="panel">
+        <h2>Overall trend</h2>
+        <div class="trend" id="trend"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-marks" hidden>
+    <div class="panel hero" id="marksHero"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Marks by subject</h2>
+        <button class="btn primary small" id="addMarkBtn">+ Add marks</button>
+      </div>
+      <div id="marks"></div>
+    </div>
+  </section>
+
+  <section id="tab-settings" hidden>
+    <div class="panel settings-list">
+      <h2>Settings</h2>
+      <label>Required attendance %<input id="targetInput" type="number" min="1" max="100" inputmode="numeric"></label>
+      <div>
+        <p class="hint" style="margin-bottom:8px">Back up your data to a file, or load a backup on another device.</p>
+        <div class="actions">
+          <button class="btn" id="exportBtn">Download backup</button>
+          <button class="btn" id="importBtn">Load backup</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+        <p class="error" id="importError" role="alert"></p>
+      </div>
+      <button class="btn" id="changePinBtn">Change PIN</button>
+      <div>
+        <p class="hint" style="margin-bottom:8px"><b>Portal bookmark, set up once.</b> Copy the code, then in your browser right-click a favourite, choose Edit, paste it into the URL box and name it <b>Copy for Orbit</b>.</p>
+        <button class="btn" id="copyBookmarkBtn">Copy bookmark code</button>
+      </div>
+      <button class="btn danger" id="deleteProfileBtn">Delete this profile</button>
+    </div>
+  </section>
+</main>
+
+<!-- Subject dialog -->
+<dialog id="subjectDialog">
+  <form class="stack" id="subjectForm">
+    <h2 id="subjectDialogTitle">Add subject</h2>
+    <label>Subject name<input id="sName" maxlength="80" required autocomplete="off"></label>
+    <div class="row-2">
+      <label>Classes attended<input id="sAttended" type="number" min="0" step="1" inputmode="numeric" required></label>
+      <label>Total classes<input id="sTotal" type="number" min="0" step="1" inputmode="numeric" required></label>
+    </div>
+    <p class="hint">Use hours instead of classes if your college counts hours.</p>
+    <p class="error" id="subjectError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn danger small left" type="button" id="subjectDelete" hidden>Delete</button>
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Marks dialog -->
+<dialog id="markDialog">
+  <form class="stack" id="markForm">
+    <h2>Add marks</h2>
+    <label>Subject<select id="mSubject" required></select></label>
+    <label>Test or assessment<input id="mLabel" maxlength="60" placeholder="e.g. CT1, Mid-term, Quiz 2" required autocomplete="off"></label>
+    <div class="row-2">
+      <label>Marks scored<input id="mObtained" type="number" min="0" step="any" inputmode="decimal" required></label>
+      <label>Out of<input id="mMax" type="number" min="1" step="any" inputmode="decimal" required></label>
+    </div>
+    <p class="error" id="markError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Portal update dialog -->
+<dialog id="portalDialog">
+  <div class="stack">
+    <h2>Update from portal</h2>
+    <ol class="steps">
+      <li>Log in to your portal and open your attendance page.</li>
+      <li>Click the <b>Copy for Orbit</b> bookmark. It is in Settings if you have not added it yet.</li>
+      <li>Come back here and tap <b>Paste</b>.</li>
+    </ol>
+    <button class="btn primary" type="button" id="portalPasteBtn">Paste</button>
+    <textarea id="portalPaste" rows="2" placeholder="If Paste does not work, long-press or right-click here and choose Paste" aria-label="Paste portal data"></textarea>
+    <div id="portalResult" class="portal-result" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="button" id="portalApply" disabled>Update my attendance</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- PIN dialog -->
+<dialog id="pinDialog">
+  <form class="stack" id="pinForm">
+    <h2>Change PIN</h2>
+    <label>Current PIN<input id="pinOld" type="password" inputmode="numeric" maxlength="8" required autocomplete="off"></label>
+    <label>New PIN (4 to 8 digits)<input id="pinNew" type="password" inputmode="numeric" pattern="[0-9]{4,8}" maxlength="8" required autocomplete="off"></label>
+    <p class="error" id="pinError" role="alert"></p>
+    <div class="dialog-actions">
+      <button class="btn" type="button" data-close>Cancel</button>
+      <button class="btn primary" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button id="toastUndo">Undo</button></div>
+<div class="tooltip" id="tooltip" hidden></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const round1 = (n) => Math.round(n * 10) / 10;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 'es'}`;
+
+// ---------- Storage (this browser only) ----------
+const store = {
+  get(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
+  },
+  remove(key) { try { localStorage.removeItem(key); } catch {} },
+};
+const PROFILES_KEY = 'orbit.profiles';
+const dataKey = (id) => 'orbit.data.' + id;
+const emptyData = () => ({ target: 75, subjects: [], history: [] });
+
+// A light hash so the PIN is not stored as plain text. It only keeps out casual snoopers.
+function hashPin(pin, salt) {
+  let h = 2166136261;
+  for (const ch of salt + ':' + pin) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  for (let i = 0; i < 2000; i++) { h ^= h >>> 13; h = Math.imul(h, 2246822507); h ^= h >>> 16; }
+  return (h >>> 0).toString(16);
+}
+
+let profiles = store.get(PROFILES_KEY, []);
+let current = null;   // the logged-in profile
+let data = null;      // that profile's subjects and marks
+let undoSnapshot = null;
+let toastTimer = null;
+
+// ---------- Maths ----------
+function stats(s, target) {
+  const percent = s.total > 0 ? round1((s.attended / s.total) * 100) : null;
+  const r = target / 100;
+  let canMiss = null, mustAttend = null;
+  if (percent != null) {
+    if (percent >= target) canMiss = Math.floor((s.attended - r * s.total) / r + 1e-9);
+    else if (r < 1) mustAttend = Math.ceil((r * s.total - s.attended) / (1 - r) - 1e-9);
+  }
+  const status = percent == null ? 'none' : percent < target ? 'below' : percent < target + 5 ? 'close' : 'safe';
+  return { ...s, percent, canMiss, mustAttend, status };
+}
+
+function overall(subjects) {
+  const total = subjects.reduce((n, s) => n + s.total, 0);
+  return total > 0 ? round1((subjects.reduce((n, s) => n + s.attended, 0) / total) * 100) : null;
+}
+
+function marksPercent(marks) {
+  const max = marks.reduce((n, m) => n + m.max, 0);
+  return max > 0 ? round1((marks.reduce((n, m) => n + m.obtained, 0) / max) * 100) : null;
+}
+
+// ---------- Saving ----------
+function save() {
+  const value = overall(data.subjects);
+  const today = new Date().toISOString().slice(0, 10);
+  data.history = data.history.filter((h) => h.date !== today);
+  if (value != null) data.history.push({ date: today, overall: value });
+  data.history = data.history.slice(-365);
+  if (!store.set(dataKey(current.id), data)) showToast('Could not save on this device. Download a backup in Settings.', false);
+  render();
+}
+
+function change(message, mutate) {
+  undoSnapshot = JSON.parse(JSON.stringify(data));
+  mutate();
+  save();
+  showToast(message, true);
+}
+
+function showToast(text, canUndo) {
+  $('toastText').textContent = text;
+  $('toastUndo').hidden = !canUndo;
+  $('toast').hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { $('toast').hidden = true; undoSnapshot = null; }, 5000);
+}
+
+$('toastUndo').onclick = () => {
+  if (!undoSnapshot) return;
+  data = undoSnapshot;
+  undoSnapshot = null;
+  $('toast').hidden = true;
+  save();
+};
+
+// ---------- Login ----------
+function renderLogin() {
+  $('loginView').hidden = false;
+  $('appView').hidden = true;
+  $('unlockForm').hidden = true;
+  $('createForm').hidden = false;
+  $('profileList').innerHTML = profiles.map((p) => `
+    <button class="profile-btn" data-id="${esc(p.id)}">
+      <span class="avatar" aria-hidden="true">${esc(p.name.trim().charAt(0).toUpperCase())}</span>
+      <span>${esc(p.name)}</span>
+    </button>`).join('');
+  $('createForm').querySelector('h2').textContent = profiles.length ? 'Or add a new profile' : 'New profile';
+}
+
+let pendingProfile = null;
+$('profileList').onclick = (e) => {
+  const btn = e.target.closest('.profile-btn');
+  if (!btn) return;
+  pendingProfile = profiles.find((p) => p.id === btn.dataset.id);
+  $('unlockTitle').textContent = 'Log in as ' + pendingProfile.name;
+  $('unlockError').textContent = '';
+  $('unlockPin').value = '';
+  $('unlockForm').hidden = false;
+  $('createForm').hidden = true;
+  $('unlockPin').focus();
+};
+$('unlockCancel').onclick = renderLogin;
+
+$('unlockForm').onsubmit = (e) => {
+  e.preventDefault();
+  if (hashPin($('unlockPin').value, pendingProfile.salt) !== pendingProfile.pinHash) {
+    $('unlockError').textContent = 'Wrong PIN. Try again.';
+    return;
+  }
+  openProfile(pendingProfile);
+};
+
+$('createForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('newName').value.trim();
+  const pin = $('newPin').value;
+  if (!name) return ($('createError').textContent = 'Enter your name.');
+  if (!/^\d{4,8}$/.test(pin)) return ($('createError').textContent = 'The PIN must be 4 to 8 digits.');
+  if (profiles.some((p) => p.name.toLowerCase() === name.toLowerCase())) return ($('createError').textContent = 'That name is already taken on this device.');
+  const salt = uid();
+  const profile = { id: uid(), name, salt, pinHash: hashPin(pin, salt) };
+  profiles.push(profile);
+  if (!store.set(PROFILES_KEY, profiles)) return ($('createError').textContent = 'This browser is blocking storage, so nothing can be saved.');
+  store.set(dataKey(profile.id), emptyData());
+  $('newName').value = '';
+  $('newPin').value = '';
+  $('createError').textContent = '';
+  openProfile(profile);
+};
+
+function openProfile(profile) {
+  current = profile;
+  data = { ...emptyData(), ...store.get(dataKey(profile.id), emptyData()) };
+  $('loginView').hidden = true;
+  $('appView').hidden = false;
+  $('who').textContent = profile.name;
+  selectTab('attendance');
+  render();
+}
+
+$('logoutBtn').onclick = () => {
+  current = null;
+  data = null;
+  $('toast').hidden = true;
+  renderLogin();
+};
+
+// ---------- Tabs ----------
+function selectTab(name) {
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  ['attendance', 'marks', 'settings'].forEach((t) => ($('tab-' + t).hidden = t !== name));
+}
+document.querySelector('.tabs').onclick = (e) => {
+  const tab = e.target.closest('.tab');
+  if (tab) selectTab(tab.dataset.tab);
+};
+
+// ---------- Rendering ----------
+const STATUS_COLOR = { safe: 'var(--good)', close: 'var(--warn)', below: 'var(--crit)' };
+const STATUS_ICON = {
+  safe: '<path d="M2 7l3.5 3.5L12 3.5" fill="none" stroke-width="2"/>',
+  close: '<path d="M7 1.5L13 12.5H1z" fill="none" stroke-width="1.6"/><path d="M7 5.5v3.5" stroke-width="1.6"/>',
+  below: '<path d="M2.5 2.5l9 9M11.5 2.5l-9 9" stroke-width="2"/>',
+};
+const statusIcon = (s) => STATUS_ICON[s] ? `<svg width="14" height="14" viewBox="0 0 14 14" stroke="${STATUS_COLOR[s]}" aria-hidden="true">${STATUS_ICON[s]}</svg>` : '';
+
+function advice(s) {
+  if (s.percent == null) return 'No classes yet';
+  if (s.mustAttend != null) return `Attend the next ${plural(s.mustAttend, 'class')} to reach the target`;
+  if (s.canMiss != null) return s.canMiss === 0 ? 'No classes to spare' : `Can miss ${plural(s.canMiss, 'class')}`;
+  return 'Below target';
+}
+
+function gauge(value, target, label) {
+  if (value == null) return `<div class="gauge-text"><span class="gauge-value">--</span><span class="gauge-label">${esc(label)}</span></div>`;
+  const r = 70, c = 2 * Math.PI * r;
+  const tick = target != null ? `<line x1="${80 + r - 9}" y1="80" x2="${80 + r + 9}" y2="80" stroke="var(--ink)" stroke-width="2" transform="rotate(${(target / 100) * 360} 80 80)"/>` : '';
+  return `
+    <svg width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="${esc(label)}: ${value} percent">
+      <circle cx="80" cy="80" r="${r}" fill="none" stroke="var(--track)" stroke-width="10"/>
+      <circle cx="80" cy="80" r="${r}" fill="none" stroke="var(--series)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(Math.min(value, 100) / 100) * c} ${c}"/>
+      ${tick}
+    </svg>
+    <div class="gauge-text"><span class="gauge-value">${value}%</span><span class="gauge-label">${esc(label)}</span></div>`;
+}
+
+const tile = (v, label) => `<div class="tile"><b>${esc(v)}</b><span>${esc(label)}</span></div>`;
+
+function render() {
+  if (!data) return;
+  const target = data.target;
+  const items = data.subjects.map((s) => stats(s, target));
+
+  // Attendance hero
+  $('gauge').innerHTML = gauge(overall(data.subjects), target, 'TARGET ' + target + '%');
+  $('tiles').innerHTML = tile(items.length, 'subjects')
+    + tile(items.filter((i) => i.status === 'below').length, 'below target')
+    + tile(items.reduce((n, i) => n + (i.canMiss || 0), 0), 'classes you can miss')
+    + tile(items.reduce((n, i) => n + (i.mustAttend || 0), 0), 'classes needed to recover');
+
+  // Subject list, most at risk first
+  const order = { below: 0, close: 1, safe: 2, none: 3 };
+  $('subjects').innerHTML = items.length ? [...items]
+    .sort((a, b) => order[a.status] - order[b.status] || (a.percent || 0) - (b.percent || 0))
+    .map((s) => `
+      <div class="subject">
+        <div class="subject-top">
+          <div>
+            <div class="subject-name">${esc(s.name)}</div>
+            <div class="subject-count">${esc(s.attended)} / ${esc(s.total)}</div>
+          </div>
+          <div class="subject-pct">${s.percent == null ? '--' : esc(s.percent) + '%'}</div>
+        </div>
+        <div class="bar" aria-hidden="true">
+          <div class="bar-fill" style="width:${Math.min(100, s.percent || 0)}%"></div>
+          <div class="bar-target" style="left:${Math.min(100, target)}%"></div>
+        </div>
+        <div class="subject-bottom">
+          <div class="status">${statusIcon(s.status)}<span>${esc(advice(s))}</span></div>
+          <div class="actions">
+            <button class="btn small present" data-act="present" data-id="${esc(s.id)}">+ Present</button>
+            <button class="btn small absent" data-act="absent" data-id="${esc(s.id)}">+ Absent</button>
+            <button class="btn small" data-act="edit" data-id="${esc(s.id)}">Edit</button>
+          </div>
+        </div>
+      </div>`).join('')
+    : '<p class="empty-note">No subjects yet. Press <b>+ Add subject</b> and type in your attended and total classes.</p>';
+
+  renderWhatIf(items);
+  renderTrend();
+  renderMarks();
+  $('targetInput').value = target;
+}
+
+$('subjects').onclick = (e) => {
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const s = data.subjects.find((x) => x.id === btn.dataset.id);
+  if (btn.dataset.act === 'present') change(`Marked present in ${s.name}`, () => { s.attended++; s.total++; });
+  if (btn.dataset.act === 'absent') change(`Marked absent in ${s.name}`, () => { s.total++; });
+  if (btn.dataset.act === 'edit') openSubjectDialog(s);
+};
+
+// ---------- What if ----------
+function renderWhatIf(items) {
+  const select = $('wiSubject');
+  const previous = select.value;
+  const usable = items.filter((i) => i.total > 0);
+  select.innerHTML = usable.map((i) => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('');
+  if (usable.some((i) => i.id === previous)) select.value = previous;
+  updateWhatIf();
+}
+
+function updateWhatIf() {
+  const s = data && data.subjects.find((x) => x.id === $('wiSubject').value);
+  if (!s) { $('wiResult').textContent = 'Add a subject with classes to try this.'; return; }
+  const n = (id) => Math.max(0, parseInt($(id).value, 10) || 0);
+  const total = s.total + n('wiAttend') + n('wiMiss');
+  const next = round1(((s.attended + n('wiAttend')) / total) * 100);
+  const now = round1((s.attended / s.total) * 100);
+  $('wiResult').innerHTML = `<b>${esc(next)}%</b>${next >= data.target ? 'At or above' : 'Below'} your ${esc(data.target)}% target, from ${esc(now)}% now.`;
+}
+['wiSubject', 'wiAttend', 'wiMiss'].forEach((id) => $(id).addEventListener('input', updateWhatIf));
+
+// ---------- Trend ----------
+function renderTrend() {
+  const points = data.history;
+  const box = $('trend');
+  if (points.length < 2) {
+    box.innerHTML = '<p class="empty-note">Your trend appears after you update on two different days.</p>';
+    return;
+  }
+  const W = 560, H = 170, L = 34, R = 10, T = 10, B = 22;
+  const vals = points.map((p) => p.overall);
+  const lo = Math.floor(Math.min(...vals, data.target) / 10) * 10;
+  const hi = Math.min(100, Math.ceil(Math.max(...vals, data.target) / 10) * 10);
+  const x = (i) => L + (i / (points.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - (v - lo) / (hi - lo || 1)) * (H - T - B);
+  const fmt = (p) => new Date(p.date + 'T00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  let grid = '';
+  for (let v = lo; v <= hi; v += 10) {
+    grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/>
+      <text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">${v}</text>`;
+  }
+  const last = points.length - 1;
+  box.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Overall attendance over ${points.length} days, latest ${points[last].overall} percent">
+      ${grid}
+      <line x1="${L}" x2="${W - R}" y1="${y(data.target)}" y2="${y(data.target)}" stroke="var(--ink-2)" stroke-dasharray="4 4"/>
+      <polyline points="${points.map((p, i) => `${x(i)},${y(p.overall)}`).join(' ')}" fill="none" stroke="var(--series)" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="${x(last)}" cy="${y(points[last].overall)}" r="4" fill="var(--series)" stroke="var(--surface)" stroke-width="2"/>
+      <text x="${L}" y="${H - 5}" fill="var(--muted)" font-size="11" font-family="var(--mono)">${esc(fmt(points[0]))}</text>
+      <text x="${W - R}" y="${H - 5}" text-anchor="end" fill="var(--muted)" font-size="11" font-family="var(--mono)">${esc(fmt(points[last]))}</text>
+      <line id="cross" y1="${T}" y2="${H - B}" stroke="var(--muted)" visibility="hidden"/>
+    </svg>`;
+  const svg = box.querySelector('svg');
+  const tip = $('tooltip');
+  const move = (clientX, clientY) => {
+    const rect = svg.getBoundingClientRect();
+    const vx = ((clientX - rect.left) / rect.width) * W;
+    const i = Math.max(0, Math.min(last, Math.round(((vx - L) / (W - L - R)) * last)));
+    const cross = svg.querySelector('#cross');
+    cross.setAttribute('x1', x(i));
+    cross.setAttribute('x2', x(i));
+    cross.setAttribute('visibility', 'visible');
+    tip.textContent = `${fmt(points[i])}: ${points[i].overall}%`;
+    tip.hidden = false;
+    tip.style.left = Math.min(clientX + 12, innerWidth - 130) + 'px';
+    tip.style.top = clientY - 36 + 'px';
+  };
+  svg.onpointermove = (e) => move(e.clientX, e.clientY);
+  svg.onpointerleave = () => { tip.hidden = true; svg.querySelector('#cross').setAttribute('visibility', 'hidden'); };
+}
+
+// ---------- Marks ----------
+function renderMarks() {
+  const withMarks = data.subjects.filter((s) => (s.marks || []).length);
+  const all = withMarks.flatMap((s) => s.marks);
+  const best = withMarks.map((s) => ({ name: s.name, p: marksPercent(s.marks) })).sort((a, b) => b.p - a.p);
+  $('marksHero').innerHTML = `<div class="gauge">${gauge(marksPercent(all), null, 'ALL MARKS')}</div>
+    <div class="tiles">${tile(all.length, 'tests entered')
+      + tile(withMarks.length, 'subjects with marks')
+      + tile(best.length ? best[0].p + '%' : '--', best.length ? 'best: ' + best[0].name : 'best subject')
+      + tile(best.length ? best[best.length - 1].p + '%' : '--', best.length ? 'lowest: ' + best[best.length - 1].name : 'lowest subject')}</div>`;
+
+  $('marks').innerHTML = withMarks.length ? withMarks.map((s) => {
+    const p = marksPercent(s.marks);
+    return `<div class="mark-group">
+      <div class="subject-top"><div class="subject-name">${esc(s.name)}</div><div class="subject-pct">${esc(p)}%</div></div>
+      <div class="bar" aria-hidden="true"><div class="bar-fill" style="width:${Math.min(100, p)}%"></div></div>
+      ${s.marks.map((m) => `<div class="mark-item">
+        <span>${esc(m.label)}</span>
+        <span class="right">${esc(m.obtained)} / ${esc(m.max)}
+          <button class="icon-btn" aria-label="Delete ${esc(m.label)}" data-subject="${esc(s.id)}" data-mark="${esc(m.id)}">×</button></span>
+      </div>`).join('')}
+    </div>`;
+  }).join('') : `<p class="empty-note">${data.subjects.length ? 'No marks yet. Press <b>+ Add marks</b> after each test.' : 'Add your subjects on the Attendance tab first.'}</p>`;
+}
+
+$('marks').onclick = (e) => {
+  const btn = e.target.closest('[data-mark]');
+  if (!btn) return;
+  const s = data.subjects.find((x) => x.id === btn.dataset.subject);
+  change('Marks deleted', () => { s.marks = s.marks.filter((m) => m.id !== btn.dataset.mark); });
+};
+
+// ---------- Dialogs ----------
+document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => b.closest('dialog').close()));
+
+let editingId = null;
+function openSubjectDialog(subject) {
+  editingId = subject ? subject.id : null;
+  $('subjectDialogTitle').textContent = subject ? 'Edit subject' : 'Add subject';
+  $('sName').value = subject ? subject.name : '';
+  $('sAttended').value = subject ? subject.attended : '';
+  $('sTotal').value = subject ? subject.total : '';
+  $('subjectDelete').hidden = !subject;
+  $('subjectError').textContent = '';
+  $('subjectDialog').showModal();
+}
+$('addSubjectBtn').onclick = () => openSubjectDialog(null);
+
+$('subjectForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('sName').value.trim();
+  const attended = Number($('sAttended').value);
+  const total = Number($('sTotal').value);
+  if (!name) return ($('subjectError').textContent = 'Enter the subject name.');
+  if (!Number.isInteger(attended) || !Number.isInteger(total) || attended < 0 || total < 0) return ($('subjectError').textContent = 'Use whole numbers, 0 or more.');
+  if (attended > total) return ($('subjectError').textContent = 'Attended cannot be more than the total.');
+  if (data.subjects.some((s) => s.id !== editingId && s.name.toLowerCase() === name.toLowerCase())) return ($('subjectError').textContent = 'You already have a subject with that name.');
+  $('subjectDialog').close();
+  if (editingId) {
+    change(`Updated ${name}`, () => Object.assign(data.subjects.find((s) => s.id === editingId), { name, attended, total }));
+  } else {
+    change(`Added ${name}`, () => data.subjects.push({ id: uid(), name, attended, total, marks: [] }));
+  }
+};
+
+$('subjectDelete').onclick = () => {
+  const s = data.subjects.find((x) => x.id === editingId);
+  $('subjectDialog').close();
+  change(`Deleted ${s.name}`, () => { data.subjects = data.subjects.filter((x) => x.id !== editingId); });
+};
+
+$('addMarkBtn').onclick = () => {
+  if (!data.subjects.length) {
+    selectTab('attendance');
+    openSubjectDialog(null);
+    return;
+  }
+  $('mSubject').innerHTML = data.subjects.map((s) => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+  $('mLabel').value = '';
+  $('mObtained').value = '';
+  $('mMax').value = '';
+  $('markError').textContent = '';
+  $('markDialog').showModal();
+};
+
+$('markForm').onsubmit = (e) => {
+  e.preventDefault();
+  const obtained = Number($('mObtained').value);
+  const max = Number($('mMax').value);
+  const label = $('mLabel').value.trim();
+  if (!label) return ($('markError').textContent = 'Name the test, like CT1.');
+  if (!(max > 0) || obtained < 0) return ($('markError').textContent = 'Enter marks of 0 or more, out of more than 0.');
+  if (obtained > max) return ($('markError').textContent = 'Marks scored cannot be more than the maximum.');
+  const s = data.subjects.find((x) => x.id === $('mSubject').value);
+  $('markDialog').close();
+  change(`Saved ${label} for ${s.name}`, () => { (s.marks = s.marks || []).push({ id: uid(), label, obtained, max }); });
+};
+
+// ---------- Settings ----------
+$('targetInput').onchange = () => {
+  const t = Number($('targetInput').value);
+  if (!(t >= 1 && t <= 100)) { $('targetInput').value = data.target; return; }
+  change(`Target set to ${t}%`, () => { data.target = t; });
+};
+
+$('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify({ app: 'orbit', version: 1, ...data }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `orbit-backup-${current.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = async () => {
+  const file = $('importFile').files[0];
+  $('importFile').value = '';
+  $('importError').textContent = '';
+  if (!file) return;
+  try {
+    const backup = JSON.parse(await file.text());
+    if (backup.app !== 'orbit' || !Array.isArray(backup.subjects)) throw new Error();
+    const subjects = backup.subjects.map((s) => ({
+      id: uid(),
+      name: String(s.name || '').slice(0, 80),
+      attended: Math.max(0, Math.floor(Number(s.attended) || 0)),
+      total: Math.max(0, Math.floor(Number(s.total) || 0)),
+      marks: (Array.isArray(s.marks) ? s.marks : [])
+        .filter((m) => Number(m.max) > 0)
+        .map((m) => ({ id: uid(), label: String(m.label || 'Test').slice(0, 60), obtained: Number(m.obtained) || 0, max: Number(m.max) })),
+    })).filter((s) => s.name && s.attended <= s.total);
+    const target = Number(backup.target) >= 1 && Number(backup.target) <= 100 ? Number(backup.target) : data.target;
+    const history = (Array.isArray(backup.history) ? backup.history : [])
+      .filter((h) => /^\d{4}-\d{2}-\d{2}$/.test(h.date) && typeof h.overall === 'number');
+    change(`Loaded ${subjects.length} subjects from the backup`, () => { data = { target, subjects, history }; });
+  } catch {
+    $('importError').textContent = 'That file is not an Orbit backup.';
+  }
+};
+
+$('changePinBtn').onclick = () => {
+  $('pinOld').value = '';
+  $('pinNew').value = '';
+  $('pinError').textContent = '';
+  $('pinDialog').showModal();
+};
+$('pinForm').onsubmit = (e) => {
+  e.preventDefault();
+  if (hashPin($('pinOld').value, current.salt) !== current.pinHash) return ($('pinError').textContent = 'Current PIN is wrong.');
+  if (!/^\d{4,8}$/.test($('pinNew').value)) return ($('pinError').textContent = 'The new PIN must be 4 to 8 digits.');
+  current.salt = uid();
+  current.pinHash = hashPin($('pinNew').value, current.salt);
+  store.set(PROFILES_KEY, profiles);
+  $('pinDialog').close();
+  showToast('PIN changed', false);
+};
+
+$('deleteProfileBtn').onclick = () => {
+  if (!confirm(`Delete ${current.name} and all their attendance and marks from this device? This cannot be undone.`)) return;
+  profiles = profiles.filter((p) => p.id !== current.id);
+  store.set(PROFILES_KEY, profiles);
+  store.remove(dataKey(current.id));
+  current = null;
+  data = null;
+  renderLogin();
+};
+
+// ---------- Portal bookmark ----------
+// Runs on the portal page when you click the bookmark. It copies the visible tables
+// (never input fields or passwords) so Orbit can read them from the clipboard.
+function portalCopier() {
+  var out = [];
+  function cl(e) { return (e.innerText || '').replace(/\s+/g, ' ').trim(); }
+  function scan(w) {
+    var d;
+    try { d = w.document; d.body; } catch (x) { return; }
+    [].forEach.call(d.querySelectorAll('table'), function (t) {
+      if (t.getClientRects().length && !t.querySelector('table')) {
+        out.push({ rows: [].map.call(t.rows, function (r) { return [].map.call(r.cells, cl); }) });
+      }
+    });
+    for (var i = 0; i < w.frames.length; i++) scan(w.frames[i]);
+  }
+  scan(window);
+  var text = JSON.stringify({ orbitPortal: 1, tables: out });
+  function done() { alert('Copied ' + out.length + ' tables for Orbit. Open Orbit and tap Update from portal, then Paste.'); }
+  function fallback() {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = document.execCommand('copy');
+    ta.remove();
+    if (ok) done(); else alert('Orbit could not copy from this page.');
+  }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+  else fallback();
+}
+const bookmarkCode = 'javascript:' + encodeURIComponent('(' + portalCopier.toString().replace(/\n\s*/g, ' ') + ')()');
+
+$('copyBookmarkBtn').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(bookmarkCode);
+    showToast('Bookmark code copied. Paste it as the URL of a favourite.', false);
+  } catch {
+    prompt('Copy this code (Ctrl+C), then paste it as the URL of a favourite:', bookmarkCode);
+  }
+};
+
+// ---------- Reading portal tables ----------
+const num = (v) => { const m = String(v == null ? '' : v).replace(/,/g, '').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+const fraction = (v) => { const m = String(v == null ? '' : v).match(/(\d+(?:\.\d+)?)\s*(?:\/|out of)\s*(\d+(?:\.\d+)?)/i); return m ? { a: +m[1], b: +m[2] } : null; };
+
+function subjectColumn(headers) {
+  const low = headers.map((h) => String(h).toLowerCase());
+  const named = low.findIndex((h) => /subject|course|paper|module|description/.test(h) && !/code|credit|type|id\b|no\.?$|sem/.test(h));
+  return named >= 0 ? named : low.findIndex((h) => /subject|course|paper|module|^code$/.test(h));
+}
+
+function findHeader(rows) {
+  for (let i = 0; i < Math.min(3, rows.length); i++) {
+    const col = subjectColumn(rows[i]);
+    if (col >= 0) return { index: i, subject: col, headers: rows[i] };
+  }
+  return null;
+}
+
+// Total rows often merge cells, which shifts a number into the subject column.
+const isSummaryRow = (name, row) => !name || /^[\d.,\s%]+$/.test(name)
+  || row.some((c) => /^(grand\s*)?(total|overall|aggregate|average)\b/i.test(String(c).trim()));
+
+const titleCase = (s) => /[a-z]/.test(s) ? s : s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+
+function parseAttendance(header, rows) {
+  const r = {};
+  header.headers.forEach((raw, i) => {
+    const t = String(raw).toLowerCase();
+    if (/%|percent/.test(t)) { if (r.percent == null) r.percent = i; }
+    else if (r.attended == null && /attended|present|\batt\b/.test(t)) r.attended = i;
+    else if (r.absent == null && /absent|missed/.test(t)) r.absent = i;
+    else if (r.total == null && /total|conducted|delivered|held|lectures?|classes|sessions|\bmax\b.*hours?/.test(t)) r.total = i;
+  });
+  const out = [];
+  for (const row of rows.slice(header.index + 1)) {
+    const name = String(row[header.subject] || '').trim();
+    if (isSummaryRow(name, row)) continue;
+    let attended = r.attended != null ? num(row[r.attended]) : null;
+    let total = r.total != null ? num(row[r.total]) : null;
+    const absent = r.absent != null ? num(row[r.absent]) : null;
+    const f = r.percent != null ? fraction(row[r.percent]) : null;
+    if (f) { attended = attended == null ? f.a : attended; total = total == null ? f.b : total; }
+    if (total == null && attended != null && absent != null) total = attended + absent;
+    if (attended == null && total != null && absent != null) attended = total - absent;
+    if (attended == null || total == null || attended > total) continue;
+    out.push({ name: titleCase(name), attended: Math.round(attended), total: Math.round(total) });
+  }
+  return out;
+}
+
+function parseMarks(header, rows) {
+  const low = header.headers.map((h) => String(h).toLowerCase());
+  const skip = /s\.?\s?no|^sr|^sl|code|credit|sem|year|roll|\bid\b|type|grade|total/;
+  const out = [];
+  for (const row of rows.slice(header.index + 1)) {
+    const name = String(row[header.subject] || '').trim();
+    if (isSummaryRow(name, row)) continue;
+    const marks = [];
+    header.headers.forEach((label, i) => {
+      if (i === header.subject || skip.test(low[i])) return;
+      const f = fraction(row[i]);
+      if (f && f.b > 0) marks.push({ label: String(label).trim() || 'Test', obtained: f.a, max: f.b });
+    });
+    if (marks.length) out.push({ name: titleCase(name), marks });
+  }
+  return out;
+}
+
+function readPortal(text) {
+  const payload = JSON.parse(text);
+  if (!payload || payload.orbitPortal !== 1 || !Array.isArray(payload.tables)) throw new Error();
+  let attendance = [];
+  const marks = [];
+  for (const t of payload.tables) {
+    if (!Array.isArray(t.rows) || t.rows.length < 2) continue;
+    const header = findHeader(t.rows);
+    if (!header) continue;
+    const head = header.headers.join(' ').toLowerCase();
+    if (/attend|present|absent|conducted|delivered|\batt\b/.test(head)) {
+      const rows = parseAttendance(header, t.rows);
+      if (rows.length > attendance.length) attendance = rows;
+    } else if (/marks|obtain|score|test|quiz|internal|mid|\bct\s?\d/.test(head)) {
+      marks.push(...parseMarks(header, t.rows));
+    }
+  }
+  return { attendance, marks };
+}
+
+let portalData = null;
+const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+function showPortalResult(text) {
+  portalData = null;
+  $('portalApply').disabled = true;
+  let parsed;
+  try { parsed = readPortal(text); } catch {
+    $('portalResult').innerHTML = '<p class="error">That is not data from the Copy for Orbit bookmark. Click the bookmark on your attendance page first.</p>';
+    return;
+  }
+  if (!parsed.attendance.length && !parsed.marks.length) {
+    $('portalResult').innerHTML = '<p class="error">No attendance or marks table was found on that page. Open the page with the table and click the bookmark again.</p>';
+    return;
+  }
+  portalData = parsed;
+  $('portalApply').disabled = false;
+  const tag = (name) => data.subjects.some((s) => sameName(s.name, name)) ? '' : ' <span class="tag">NEW</span>';
+  $('portalResult').innerHTML = `
+    ${parsed.attendance.length ? `<b>${parsed.attendance.length} subjects found:</b><ul>${parsed.attendance.map((a) => `<li>${esc(a.name)}: ${esc(a.attended)} / ${esc(a.total)}${tag(a.name)}</li>`).join('')}</ul>` : ''}
+    ${parsed.marks.length ? `<p style="margin:8px 0 0"><b>Marks found for ${parsed.marks.length} subjects.</b></p>` : ''}`;
+}
+
+$('portalBtn').onclick = () => {
+  portalData = null;
+  $('portalPaste').value = '';
+  $('portalResult').innerHTML = '';
+  $('portalApply').disabled = true;
+  $('portalDialog').showModal();
+};
+
+$('portalPasteBtn').onclick = async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    $('portalPaste').value = text.length > 200 ? text.slice(0, 200) + '…' : text;
+    showPortalResult(text);
+  } catch {
+    $('portalResult').innerHTML = '<p class="hint">Your browser blocked Paste. Long-press or right-click the box above and choose Paste.</p>';
+    $('portalPaste').focus();
+  }
+};
+$('portalPaste').addEventListener('paste', (e) => {
+  const text = e.clipboardData.getData('text');
+  e.preventDefault();
+  $('portalPaste').value = text.length > 200 ? text.slice(0, 200) + '…' : text;
+  showPortalResult(text);
+});
+
+$('portalApply').onclick = () => {
+  if (!portalData) return;
+  const { attendance, marks } = portalData;
+  $('portalDialog').close();
+  change(`Updated ${attendance.length} subjects from the portal`, () => {
+    for (const a of attendance) {
+      const s = data.subjects.find((x) => sameName(x.name, a.name));
+      if (s) Object.assign(s, { attended: a.attended, total: a.total });
+      else data.subjects.push({ id: uid(), name: a.name, attended: a.attended, total: a.total, marks: [] });
+    }
+    for (const m of marks) {
+      let s = data.subjects.find((x) => sameName(x.name, m.name));
+      if (!s) { s = { id: uid(), name: m.name, attended: 0, total: 0, marks: [] }; data.subjects.push(s); }
+      s.marks = s.marks || [];
+      for (const item of m.marks) {
+        const existing = s.marks.find((x) => sameName(x.label, item.label));
+        if (existing) Object.assign(existing, { obtained: item.obtained, max: item.max });
+        else s.marks.push({ id: uid(), ...item });
+      }
+    }
+  });
+};
+
+// Lets the app install on phones and open without internet once it is on a website.
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+// Ask the browser not to clear Orbit's saved data when space runs low.
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+renderLogin();
+</script>
+</body>
+</html>
