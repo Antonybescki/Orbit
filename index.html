@@ -1603,7 +1603,7 @@ function parseMarks(header, rows) {
     header.headers.forEach((label, i) => {
       if (i === header.subject || skip.test(low[i])) return;
       const f = fraction(row[i]);
-      if (f && f.b > 0) marks.push({ label: String(label).trim() || 'Test', obtained: f.a, max: f.b });
+      if (f && f.b > 0) marks.push({ label: /mark\s*\/\s*max/i.test(label) ? 'Internal' : (String(label).trim() || 'Test'), obtained: f.a, max: f.b });
     });
     if (marks.length) out.push({ name: titleCase(name), marks });
   }
@@ -1623,7 +1623,7 @@ function readPortal(text) {
     if (/attend|present|absent|conducted|delivered|\batt\b/.test(head)) {
       const rows = parseAttendance(header, t.rows);
       if (rows.length > attendance.length) attendance = rows;
-    } else if (/marks|obtain|score|test|quiz|internal|mid|\bct\s?\d/.test(head)) {
+    } else if (/\bmarks?\b|obtain|score|test|quiz|internal|mid|\bct\s?\d/.test(head)) {
       marks.push(...parseMarks(header, t.rows));
     }
   }
