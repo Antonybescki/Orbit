@@ -89,6 +89,7 @@ async def fresh_captcha(sid):
     await page.goto(PORTAL, wait_until="domcontentloaded", timeout=45000)
     await page.get_by_placeholder("NetID").wait_for(state="visible", timeout=20000)
     await page.wait_for_timeout(800)
+    s["t0"] = time.time()
     return base64.b64encode(await captcha_png(page)).decode()
 
 
@@ -117,8 +118,9 @@ async def start(request):
         async def on_response(r, net=net):
             try:
                 if r.request.method == "POST" and len(net) < 6:
-                    body = (await r.text())[:300]
-                    net.append(f"{r.status} {r.url.split('?')[0][-60:]} {body}")
+                    body = (await r.text()).strip()
+                    body = "(html page)" if body[:1] == "<" else body[:200]
+                    net.append(f"{r.status} {r.url.split('?')[0][-40:]} {body}")
             except Exception:
                 pass
 
@@ -170,6 +172,12 @@ async def login(request):
             await box.fill("")
             await box.press_sequentially(val, delay=45)
         password = None
+        try:
+            info = await page.evaluate("""() => Array.from(document.querySelectorAll('input,select')).map(i => (i.name || i.id || i.placeholder || '?') + ':' + i.type + ':' + (i.value || '').length).join(', ')""")
+            s["net"].append("form: " + info)
+            s["net"].append("captcha age: %ds" % int(time.time() - s.get("t0", time.time())))
+        except Exception:
+            pass
         pre = ""
         try:
             pre = base64.b64encode(await page.screenshot(type="jpeg", quality=55)).decode()
