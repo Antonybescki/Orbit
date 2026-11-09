@@ -664,10 +664,11 @@ dialog h2 { margin-bottom: 4px; }
         <button class="btn primary" type="button" id="syncGo">Sync from portal</button>
       </div>
       <p class="hint" id="syncMsg" aria-live="polite"></p>
+      <pre id="syncNet" class="hint" style="white-space:pre-wrap;word-break:break-all;margin:0" hidden></pre>
       <img id="syncPre" alt="Form before Login" style="max-width:100%;border-radius:8px" hidden>
       <img id="syncShot" alt="What the server saw" style="max-width:100%;border-radius:8px" hidden>
       <button class="btn small" type="button" id="syncCfgBtn">Server settings</button>
-      <p class="hint" style="margin:0;text-align:center">Sync build 8</p>
+      <p class="hint" style="margin:0;text-align:center">Sync build 9</p>
     </div>
     <details id="manualBox"><summary>Use the bookmark instead</summary>
     <ol class="steps">
@@ -1743,7 +1744,7 @@ $('syncRefresh').onclick = async () => {
   catch (e) { syncMsg(e.msg); if (!syncSid || /expired/i.test(e.msg)) syncReset(); }
 };
 $('syncGo').onclick = async () => {
-  $('syncShot').hidden = true; $('syncPre').hidden = true;
+  $('syncShot').hidden = true; $('syncPre').hidden = true; $('syncNet').hidden = true;
   syncMsg('Logging in and reading the portal. About 20 seconds.');
   $('syncGo').disabled = true;
   try {
@@ -1755,6 +1756,7 @@ $('syncGo').onclick = async () => {
   } catch (e) {
     syncMsg(e.msg);
     $('syncPw').value = '';
+    if (e.j && e.j.net && e.j.net.length) { $('syncNet').textContent = e.j.net.join('\n'); $('syncNet').hidden = false; }
     if (e.j && e.j.pre) { $('syncPre').src = 'data:image/jpeg;base64,' + e.j.pre; $('syncPre').hidden = false; }
     if (e.j && e.j.shot) { $('syncShot').src = 'data:image/jpeg;base64,' + e.j.shot; $('syncShot').hidden = false; }
     if (e.j && e.j.captcha) syncShowCaptcha(e.j);

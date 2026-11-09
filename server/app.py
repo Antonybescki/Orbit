@@ -105,10 +105,26 @@ async def start(request):
             oldest = min(state["sessions"], key=lambda k: state["sessions"][k]["ts"])
             await close_session(oldest)
         browser = await get_browser()
-        ctx = await browser.new_context(viewport={"width": 1280, "height": 900})
+        ctx = await browser.new_context(
+            viewport={"width": 1280, "height": 900},
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            locale="en-IN", timezone_id="Asia/Kolkata",
+        )
+        await ctx.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
         page = await ctx.new_page()
+        net = []
+
+        async def on_response(r, net=net):
+            try:
+                if r.request.method == "POST" and len(net) < 6:
+                    body = (await r.text())[:300]
+                    net.append(f"{r.status} {r.url.split('?')[0][-60:]} {body}")
+            except Exception:
+                pass
+
+        page.on("response", lambda r: asyncio.ensure_future(on_response(r)))
         sid = secrets.token_urlsafe(16)
-        state["sessions"][sid] = {"ctx": ctx, "page": page, "ts": time.time()}
+        state["sessions"][sid] = {"ctx": ctx, "page": page, "net": net, "ts": time.time()}
     try:
         png = await fresh_captcha(sid)
     except Exception:
@@ -178,7 +194,7 @@ async def login(request):
             except Exception:
                 pass
             try:
-                return JSONResponse({"error": msg, "pre": pre, "shot": shot, "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
+                return JSONResponse({"error": msg, "pre": pre, "shot": shot, "net": s.get("net", []), "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
             except Exception:
                 await close_session(sid)
                 return JSONResponse({"error": msg}, status_code=401)
