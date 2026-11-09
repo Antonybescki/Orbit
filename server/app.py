@@ -165,8 +165,13 @@ async def login(request):
                     msg = alert.strip()[:200]
             except Exception:
                 pass
+            shot = ""
             try:
-                return JSONResponse({"error": msg, "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
+                shot = base64.b64encode(await page.screenshot(type="jpeg", quality=55)).decode()
+            except Exception:
+                pass
+            try:
+                return JSONResponse({"error": msg, "shot": shot, "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
             except Exception:
                 await close_session(sid)
                 return JSONResponse({"error": msg}, status_code=401)
