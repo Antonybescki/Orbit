@@ -1,6 +1,6 @@
 // Keeps a copy of Orbit on the phone so it opens without internet.
 // Bump VERSION whenever you upload a new index.html so phones pick it up.
-const VERSION = 'orbit-v4';
+const VERSION = 'orbit-v5';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {

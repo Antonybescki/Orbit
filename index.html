@@ -648,6 +648,25 @@ dialog h2 { margin-bottom: 4px; }
 <dialog id="portalDialog">
   <div class="stack">
     <h2>Update from portal</h2>
+    <div id="syncBox" class="stack" style="gap:10px">
+      <div id="syncCfg" class="stack" style="gap:8px" hidden>
+        <label>Server address<input id="syncUrl" type="url" placeholder="https://your-orbit-server.onrender.com" autocomplete="off"></label>
+        <label>Access key<input id="syncKey" type="password" autocomplete="off"></label>
+        <button class="btn" type="button" id="syncSave">Save server</button>
+      </div>
+      <button class="btn primary" type="button" id="syncStart">Get CAPTCHA</button>
+      <div id="syncForm" class="stack" style="gap:8px" hidden>
+        <img id="syncCap" alt="CAPTCHA" style="max-width:100%;background:#fff;border-radius:8px;align-self:flex-start">
+        <button class="btn small" type="button" id="syncRefresh">New CAPTCHA</button>
+        <label>NetID<input id="syncId" autocomplete="off" autocapitalize="none" placeholder="without @srmist.edu.in"></label>
+        <label>Password<input id="syncPw" type="password" autocomplete="off"></label>
+        <label>CAPTCHA<input id="syncCode" autocomplete="off" autocapitalize="none"></label>
+        <button class="btn primary" type="button" id="syncGo">Sync from portal</button>
+      </div>
+      <p class="hint" id="syncMsg" aria-live="polite"></p>
+      <button class="btn small" type="button" id="syncCfgBtn">Server settings</button>
+    </div>
+    <details id="manualBox"><summary>Use the bookmark instead</summary>
     <ol class="steps">
       <li>Log in to your portal and open your attendance page.</li>
       <li>Click the <b>Copy for Orbit</b> bookmark. It is in Settings if you have not added it yet.</li>
@@ -655,6 +674,7 @@ dialog h2 { margin-bottom: 4px; }
     </ol>
     <button class="btn primary" type="button" id="portalPasteBtn">Paste</button>
     <textarea id="portalPaste" rows="2" placeholder="If Paste does not work, long-press or right-click here and choose Paste" aria-label="Paste portal data"></textarea>
+    </details>
     <div id="portalResult" class="portal-result" aria-live="polite"></div>
     <div class="dialog-actions">
       <button class="btn" type="button" data-close>Cancel</button>
@@ -1659,7 +1679,82 @@ $('portalBtn').onclick = () => {
   $('portalResult').innerHTML = '';
   $('portalApply').disabled = true;
   $('portalDialog').showModal();
-  $('portalPasteBtn').click();   // read what you copied straight away, so there is no separate Paste step
+  syncReset();
+  if (!syncCfg().url) $('syncCfg').hidden = false;
+};
+
+// ---------- Server sync (CAPTCHA typed in Orbit, server reads the portal) ----------
+const SYNC_KEY = 'orbit.sync';
+function syncCfg() { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch (e) { return {}; } }
+let syncSid = null;
+function syncMsg(t) { $('syncMsg').textContent = t || ''; }
+function syncReset() {
+  syncSid = null;
+  $('syncForm').hidden = true;
+  $('syncPw').value = ''; $('syncCode').value = '';
+  $('syncStart').hidden = false;
+  syncMsg('');
+}
+async function syncCall(path, body) {
+  const c = syncCfg();
+  if (!c.url || !c.key) throw { msg: 'Save your server address and access key first.' };
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 90000);
+  try {
+    const r = await fetch(c.url.replace(/\/+$/, '') + path, { method: 'POST', signal: ctl.signal,
+      headers: { 'content-type': 'application/json', 'x-access-key': c.key }, body: JSON.stringify(body || {}) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw { msg: j.error || 'Server said no (' + r.status + ').', j };
+    return j;
+  } catch (e) {
+    if (e && e.msg) throw e;
+    throw { msg: 'Could not reach the server. If it was asleep, wait a minute and try again.' };
+  } finally { clearTimeout(t); }
+}
+function syncShowCaptcha(j) {
+  syncSid = j.session;
+  $('syncCap').src = 'data:image/png;base64,' + j.captcha;
+  $('syncForm').hidden = false;
+  $('syncStart').hidden = true;
+  $('syncCode').value = '';
+}
+$('syncCfgBtn').onclick = () => {
+  const c = syncCfg();
+  $('syncUrl').value = c.url || ''; $('syncKey').value = c.key || '';
+  $('syncCfg').hidden = !$('syncCfg').hidden;
+};
+$('syncSave').onclick = () => {
+  try { localStorage.setItem(SYNC_KEY, JSON.stringify({ url: $('syncUrl').value.trim(), key: $('syncKey').value.trim() })); } catch (e) {}
+  $('syncCfg').hidden = true;
+  syncMsg('Server saved.');
+};
+$('syncStart').onclick = async () => {
+  syncMsg('Waking the server and loading the CAPTCHA. The first time can take a minute.');
+  $('syncStart').disabled = true;
+  try { syncShowCaptcha(await syncCall('/session')); syncMsg(''); }
+  catch (e) { syncMsg(e.msg); }
+  $('syncStart').disabled = false;
+};
+$('syncRefresh').onclick = async () => {
+  try { syncShowCaptcha(await syncCall('/refresh', { session: syncSid })); syncMsg(''); }
+  catch (e) { syncMsg(e.msg); if (!syncSid || /expired/i.test(e.msg)) syncReset(); }
+};
+$('syncGo').onclick = async () => {
+  syncMsg('Logging in and reading the portal. About 20 seconds.');
+  $('syncGo').disabled = true;
+  try {
+    const j = await syncCall('/login', { session: syncSid, netid: $('syncId').value, password: $('syncPw').value, captcha: $('syncCode').value });
+    $('syncPw').value = '';
+    syncReset();
+    syncMsg('');
+    showPortalResult(JSON.stringify(j));
+  } catch (e) {
+    syncMsg(e.msg);
+    $('syncPw').value = '';
+    if (e.j && e.j.captcha) syncShowCaptcha(e.j);
+    else if (/expired/i.test(e.msg)) syncReset();
+  }
+  $('syncGo').disabled = false;
 };
 
 $('portalPasteBtn').onclick = async () => {

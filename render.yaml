@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: orbit-sync
+    runtime: docker
+    plan: free
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /health
+    envVars:
+      - key: ACCESS_KEY
+        sync: false
+      - key: ALLOW_ORIGIN
+        value: https://antonybescki.github.io
