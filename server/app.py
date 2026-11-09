@@ -148,10 +148,17 @@ async def login(request):
     if not netid or not password or not captcha:
         return JSONResponse({"error": "Enter NetID, password and the CAPTCHA."}, status_code=400)
     try:
-        await page.get_by_placeholder("NetID").fill(netid)
-        await page.get_by_placeholder("Password").fill(password)
-        await page.get_by_placeholder("Captcha").fill(captcha)
+        for ph, val in (("NetID", netid), ("Password", password), ("Captcha", captcha)):
+            box = page.get_by_placeholder(ph)
+            await box.click()
+            await box.fill("")
+            await box.press_sequentially(val, delay=45)
         password = None
+        pre = ""
+        try:
+            pre = base64.b64encode(await page.screenshot(type="jpeg", quality=55)).decode()
+        except Exception:
+            pass
         await page.get_by_role("button", name="Login").click()
         menu = page.get_by_text(PAGES[0], exact=False).first
         try:
@@ -171,7 +178,7 @@ async def login(request):
             except Exception:
                 pass
             try:
-                return JSONResponse({"error": msg, "shot": shot, "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
+                return JSONResponse({"error": msg, "pre": pre, "shot": shot, "session": sid, "captcha": await fresh_captcha(sid)}, status_code=401)
             except Exception:
                 await close_session(sid)
                 return JSONResponse({"error": msg}, status_code=401)
