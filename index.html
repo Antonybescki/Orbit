@@ -651,7 +651,7 @@ dialog h2 { margin-bottom: 4px; }
     <ol class="steps">
       <li>Log in to your portal and open your attendance page.</li>
       <li>Click the <b>Copy for Orbit</b> bookmark. It is in Settings if you have not added it yet.</li>
-      <li>Come back here and tap <b>Paste</b>.</li>
+      <li>Come back here and tap <b>Portal</b>. Orbit reads what you copied. If your browser asks, tap <b>Paste</b>.</li>
     </ol>
     <button class="btn primary" type="button" id="portalPasteBtn">Paste</button>
     <textarea id="portalPaste" rows="2" placeholder="If Paste does not work, long-press or right-click here and choose Paste" aria-label="Paste portal data"></textarea>
@@ -1659,6 +1659,7 @@ $('portalBtn').onclick = () => {
   $('portalResult').innerHTML = '';
   $('portalApply').disabled = true;
   $('portalDialog').showModal();
+  $('portalPasteBtn').click();   // read what you copied straight away, so there is no separate Paste step
 };
 
 $('portalPasteBtn').onclick = async () => {
