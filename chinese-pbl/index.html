@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#B3261E">
+<title>你好 · Chinese PBL — A. Antony Bescki</title>
+<meta name="description" content="Chinese language project-based learning website by A. Antony Bescki (RA2611026010076).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23B3261E'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle' fill='%23FBF6EC'%3E中%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --paper: #FBF6EC;
+    --paper-2: #F3EBDA;
+    --ink: #1D1A17;
+    --ink-soft: #5B534A;
+    --red: #B3261E;
+    --red-deep: #8C1B15;
+    --gold: #B8862B;
+    --line: #E2D6BF;
+    --card: #FFFDF8;
+    --ok: #2E7D4F;
+    --han: "Noto Serif SC", "Songti SC", "STSong", "SimSun", "PingFang SC", "Microsoft YaHei", serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { width: min(1080px, 100% - 40px); margin-inline: auto; }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.15; margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .han { font-family: var(--han); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(251, 246, 236, .92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--serif); font-weight: 700; text-decoration: none; color: var(--ink); }
+  .seal {
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--red); color: var(--paper);
+    font-family: var(--han); font-size: 21px; font-weight: 700;
+  }
+  .links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .links::-webkit-scrollbar { display: none; }
+  .links a {
+    white-space: nowrap; text-decoration: none; color: var(--ink-soft);
+    padding: 8px 12px; border-radius: 999px; font-size: 14.5px; font-weight: 500;
+  }
+  .links a:hover { background: var(--paper-2); color: var(--red); }
+
+  /* Hero */
+  header.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .hero .wrap { display: grid; grid-template-columns: 1.25fr .75fr; gap: 40px; align-items: center; padding-block: 72px 80px; }
+  .eyebrow { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--red); font-weight: 700; }
+  .hero h1 { font-size: clamp(38px, 6.2vw, 68px); margin-top: 14px; }
+  .hero h1 .han { color: var(--red); display: block; font-size: 1.15em; margin-bottom: 6px; }
+  .lede { font-size: clamp(17px, 1.9vw, 20px); color: var(--ink-soft); margin-top: 20px; max-width: 54ch; }
+  .idcard {
+    margin-top: 30px; display: inline-grid; gap: 4px;
+    background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--red);
+    border-radius: 10px; padding: 16px 22px;
+    box-shadow: 0 6px 20px -12px rgba(60, 30, 10, .35);
+  }
+  .idcard small { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .idcard strong { font-family: var(--serif); font-size: 22px; letter-spacing: .02em; }
+  .idcard span { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-weight: 600; }
+  .bigchar {
+    justify-self: center;
+    width: min(300px, 70vw); aspect-ratio: 1;
+    display: grid; place-items: center;
+    background: var(--red); color: var(--paper);
+    border-radius: 28px;
+    font-family: var(--han); font-size: clamp(120px, 20vw, 200px); font-weight: 700; line-height: 1;
+    box-shadow: 0 30px 60px -30px rgba(140, 27, 21, .7), inset 0 0 0 10px var(--red), inset 0 0 0 12px rgba(251, 246, 236, .55);
+    transform: rotate(-3deg);
+  }
+  .bigcap { text-align: center; margin-top: 18px; color: var(--ink-soft); font-size: 14.5px; }
+
+  /* Sections */
+  section { padding-block: 72px; border-bottom: 1px solid var(--line); }
+  section:nth-of-type(even) { background: var(--paper-2); }
+  .head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .head .han { font-size: 34px; color: var(--red); font-weight: 700; }
+  .head h2 { font-size: clamp(26px, 3.4vw, 36px); }
+  .sub { color: var(--ink-soft); max-width: 68ch; margin-bottom: 32px; }
+  .grid { display: grid; gap: 16px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g5 { grid-template-columns: repeat(5, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .card h3 { font-size: 19px; margin-bottom: 6px; }
+  .card p { color: var(--ink-soft); font-size: 15.5px; }
+  .stat { font-family: var(--serif); font-size: 36px; font-weight: 700; color: var(--red); line-height: 1.1; margin-bottom: 6px; }
+
+  /* Speak buttons */
+  .say {
+    text-align: left; width: 100%;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .say:hover { transform: translateY(-2px); border-color: var(--red); box-shadow: 0 10px 22px -16px rgba(140, 27, 21, .6); }
+  .say.on { border-color: var(--red); background: #FFF4F0; }
+  .say .zh { font-family: var(--han); font-size: 30px; font-weight: 700; line-height: 1.2; display: block; }
+  .say .py { color: var(--red); font-weight: 600; display: block; margin-top: 4px; }
+  .say .en { color: var(--ink-soft); font-size: 14.5px; display: block; }
+  .tone svg { width: 100%; height: 64px; display: block; margin-bottom: 10px; }
+  .tone .zh { font-size: 40px; }
+  .num { text-align: center; }
+  .num .zh { font-size: 44px; }
+  .num .digit { font-size: 12px; color: var(--ink-soft); font-weight: 700; letter-spacing: .1em; }
+  .hint { font-size: 14px; color: var(--ink-soft); margin-top: 16px; }
+
+  /* Culture */
+  .fest .zh { font-family: var(--han); font-size: 28px; font-weight: 700; color: var(--red); }
+  .fest .py { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; display: block; }
+
+  /* Quiz */
+  .quiz { max-width: 720px; }
+  .q { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 14px; }
+  .q p { font-weight: 600; margin-bottom: 12px; }
+  .opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .opts button { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; text-align: left; }
+  .opts button:hover:not(:disabled) { border-color: var(--red); }
+  .opts button:disabled { cursor: default; }
+  .opts .right { background: #E5F3EA; border-color: var(--ok); color: #1D5A37; font-weight: 600; }
+  .opts .wrong { background: #FBE7E4; border-color: var(--red); color: var(--red-deep); }
+  .score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 20px; font-family: var(--serif); font-size: 20px; font-weight: 700; }
+  .btn { background: var(--red); color: var(--paper); border: 0; border-radius: 999px; padding: 10px 20px; font-family: var(--sans); font-size: 15px; font-weight: 600; }
+  .btn:hover { background: var(--red-deep); }
+
+  footer { background: var(--ink); color: #D9CFBF; padding-block: 44px; text-align: center; }
+  footer .han { font-size: 30px; color: var(--paper); font-weight: 700; }
+  footer strong { color: var(--paper); font-family: var(--serif); font-size: 19px; display: block; margin-top: 12px; }
+  footer p { font-size: 14.5px; }
+
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; padding-block: 48px 56px; }
+    .bigchar { width: 200px; font-size: 120px; }
+    .g4, .g3 { grid-template-columns: repeat(2, 1fr); }
+    .g5 { grid-template-columns: repeat(3, 1fr); }
+    section { padding-block: 52px; }
+  }
+  @media (max-width: 520px) {
+    .brand span:last-child { display: none; }
+    .g3, .opts { grid-template-columns: 1fr; }
+    .g5 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .say { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="seal">中</span><span>Chinese PBL</span></a>
+    <div class="links">
+      <a href="#about">About</a>
+      <a href="#tones">Tones</a>
+      <a href="#phrases">Phrases</a>
+      <a href="#numbers">Numbers</a>
+      <a href="#culture">Culture</a>
+      <a href="#quiz">Quiz</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Project-Based Learning · Chinese Language</div>
+      <h1><span class="han" lang="zh">你好，中文！</span>Hello, Chinese!</h1>
+      <p class="lede">A beginner's journey into Mandarin Chinese — its sounds, its characters, everyday phrases and the culture behind the language.</p>
+      <div class="idcard">
+        <small>Presented by</small>
+        <strong>A. ANTONY BESCKI</strong>
+        <span>Reg. No. RA2611026010076</span>
+      </div>
+    </div>
+    <div>
+      <div class="bigchar" lang="zh" aria-hidden="true">学</div>
+      <p class="bigcap"><span class="han" lang="zh">学</span> (xué) — “to learn”</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="about">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">关于中文</span><h2>About the Chinese language</h2></div>
+    <p class="sub">Mandarin Chinese (<span class="han" lang="zh">普通话</span>, Pǔtōnghuà) is the official language of China and the most widely spoken first language in the world.</p>
+    <div class="grid g4">
+      <div class="card"><div class="stat">900M+</div><h3>Native speakers</h3><p>More people speak Mandarin as their mother tongue than any other language.</p></div>
+      <div class="card"><div class="stat">3,000+</div><h3>Years of writing</h3><p>Chinese characters trace back to oracle bone inscriptions of the Shang dynasty.</p></div>
+      <div class="card"><div class="stat">4 + 1</div><h3>Tones</h3><p>Four main tones and one neutral tone change the meaning of a syllable.</p></div>
+      <div class="card"><div class="stat">6</div><h3>UN languages</h3><p>Chinese is one of the six official languages of the United Nations.</p></div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card"><h3><span class="han" lang="zh">汉字</span> · Hànzì</h3><p>Characters are the written form. Each one stands for a syllable with a meaning, not a letter.</p></div>
+      <div class="card"><h3><span class="han" lang="zh">拼音</span> · Pīnyīn</h3><p>Pinyin writes Chinese sounds with the Roman alphabet, so beginners can read and pronounce words.</p></div>
+      <div class="card"><h3><span class="han" lang="zh">声调</span> · Shēngdiào</h3><p>Tones are the pitch pattern of a syllable. The marks above pinyin vowels show which tone to use.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tones">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">声调</span><h2>The tones of Mandarin</h2></div>
+    <p class="sub">The same syllable “ma” has five different meanings depending on its tone. Tap a card to hear it.</p>
+    <div class="grid g5" id="toneGrid"></div>
+    <p class="hint" id="voiceHint">🔊 Tap any Chinese word on this page to hear its pronunciation.</p>
+  </div>
+</section>
+
+<section id="phrases">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">日常用语</span><h2>Everyday phrases</h2></div>
+    <p class="sub">Ten useful expressions for a first conversation in Chinese.</p>
+    <div class="grid g3" id="phraseGrid"></div>
+  </div>
+</section>
+
+<section id="numbers">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">数字</span><h2>Numbers 1 – 10</h2></div>
+    <p class="sub">Once you know one to ten, bigger numbers are easy: 11 is “ten-one” (<span class="han" lang="zh">十一</span>) and 20 is “two-ten” (<span class="han" lang="zh">二十</span>).</p>
+    <div class="grid g5" id="numGrid"></div>
+  </div>
+</section>
+
+<section id="culture">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">中国文化</span><h2>Chinese culture</h2></div>
+    <p class="sub">Language and culture go together. These festivals and traditions are part of daily life in China.</p>
+    <div class="grid g4">
+      <div class="card fest"><div class="zh" lang="zh">春节</div><span class="py">Chūnjié · Spring Festival</span><p>Chinese New Year. Families reunite, share dumplings and give red envelopes (<span class="han" lang="zh">红包</span>).</p></div>
+      <div class="card fest"><div class="zh" lang="zh">元宵节</div><span class="py">Yuánxiāojié · Lantern Festival</span><p>The 15th day of the new year, celebrated with glowing lanterns and sweet rice balls.</p></div>
+      <div class="card fest"><div class="zh" lang="zh">端午节</div><span class="py">Duānwǔjié · Dragon Boat Festival</span><p>Dragon boat races and sticky rice dumplings (<span class="han" lang="zh">粽子</span>) in memory of the poet Qu Yuan.</p></div>
+      <div class="card fest"><div class="zh" lang="zh">中秋节</div><span class="py">Zhōngqiūjié · Mid-Autumn Festival</span><p>Families admire the full moon together and eat mooncakes (<span class="han" lang="zh">月饼</span>).</p></div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card"><h3><span class="han" lang="zh">十二生肖</span> · The zodiac</h3><p>Twelve animals — rat, ox, tiger, rabbit, dragon, snake, horse, goat, monkey, rooster, dog and pig — each rule one year in turn.</p></div>
+      <div class="card"><h3><span class="han" lang="zh">茶</span> · Tea</h3><p>China is the home of tea. Offering a cup of tea to a guest is a sign of respect and welcome.</p></div>
+      <div class="card"><h3><span class="han" lang="zh">书法</span> · Calligraphy</h3><p>Writing characters with brush and ink is treated as an art form, not only as handwriting.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <div class="head"><span class="han" lang="zh">小测验</span><h2>Quick quiz</h2></div>
+    <p class="sub">Check what you remember from this page.</p>
+    <div class="quiz">
+      <div id="quizBody"></div>
+      <div class="score"><span id="scoreText">Score: 0 / 5</span><button class="btn" id="retry" type="button">Try again</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="han" lang="zh">谢谢！再见！</div>
+    <p>Thank you! Goodbye!</p>
+    <strong>A. ANTONY BESCKI</strong>
+    <p>Reg. No. RA2611026010076 · Chinese Project-Based Learning</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var tones = [
+    { zh: '妈', py: 'mā', en: 'mother', name: '1st tone · high level', d: 'M8 14 H112' },
+    { zh: '麻', py: 'má', en: 'hemp', name: '2nd tone · rising', d: 'M8 46 L112 12' },
+    { zh: '马', py: 'mǎ', en: 'horse', name: '3rd tone · dip and rise', d: 'M8 30 Q50 78 112 20' },
+    { zh: '骂', py: 'mà', en: 'to scold', name: '4th tone · falling', d: 'M8 10 L112 56' },
+    { zh: '吗', py: 'ma', en: 'question word', name: 'Neutral tone · light', d: 'M56 32 h8' }
+  ];
+  var phrases = [
+    ['你好', 'nǐ hǎo', 'Hello'],
+    ['你好吗？', 'nǐ hǎo ma?', 'How are you?'],
+    ['我很好', 'wǒ hěn hǎo', 'I am fine'],
+    ['谢谢', 'xièxie', 'Thank you'],
+    ['不客气', 'bú kèqi', "You're welcome"],
+    ['对不起', 'duìbuqǐ', 'Sorry'],
+    ['早上好', 'zǎoshang hǎo', 'Good morning'],
+    ['我是学生', 'wǒ shì xuésheng', 'I am a student'],
+    ['我是印度人', 'wǒ shì Yìndù rén', 'I am Indian'],
+    ['再见', 'zàijiàn', 'Goodbye']
+  ];
+  var nums = [
+    ['一', 'yī'], ['二', 'èr'], ['三', 'sān'], ['四', 'sì'], ['五', 'wǔ'],
+    ['六', 'liù'], ['七', 'qī'], ['八', 'bā'], ['九', 'jiǔ'], ['十', 'shí']
+  ];
+  var quiz = [
+    { q: 'What does 谢谢 (xièxie) mean?', o: ['Hello', 'Thank you', 'Goodbye', 'Sorry'], a: 1 },
+    { q: 'How many main tones does Mandarin have, besides the neutral tone?', o: ['Two', 'Three', 'Four', 'Six'], a: 2 },
+    { q: 'Which character is the number 5?', o: ['三', '五', '八', '十'], a: 1 },
+    { q: 'What is eaten at the Mid-Autumn Festival?', o: ['Mooncakes', 'Dumplings', 'Noodles', 'Spring rolls'], a: 0 },
+    { q: '马 (mǎ, 3rd tone) means…', o: ['Mother', 'Hemp', 'To scold', 'Horse'], a: 3 }
+  ];
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  // Pronunciation using the browser's built-in Chinese voice
+  var synth = window.speechSynthesis;
+  function speak(text, btn) {
+    if (!synth) return;
+    synth.cancel();
+    var u = new SpeechSynthesisUtterance(text.replace(/[？?…]/g, ''));
+    u.lang = 'zh-CN';
+    u.rate = 0.8;
+    var v = synth.getVoices().filter(function (x) { return /^zh/i.test(x.lang); })[0];
+    if (v) u.voice = v;
+    btn.classList.add('on');
+    u.onend = u.onerror = function () { btn.classList.remove('on'); };
+    synth.speak(u);
+  }
+  if (!synth) {
+    document.getElementById('voiceHint').textContent = 'Audio is not supported in this browser, but you can still read the pinyin.';
+  }
+
+  function sayCard(zh, py, en, extraCls) {
+    var b = el('button', 'say' + (extraCls ? ' ' + extraCls : ''));
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Play ' + py + ', ' + en);
+    var z = el('span', 'zh', zh); z.lang = 'zh';
+    b.appendChild(z);
+    b.appendChild(el('span', 'py', py));
+    b.appendChild(el('span', 'en', en));
+    b.addEventListener('click', function () { speak(zh, b); });
+    return b;
+  }
+
+  var toneGrid = document.getElementById('toneGrid');
+  tones.forEach(function (t) {
+    var b = sayCard(t.zh, t.py, t.en, 'tone');
+    var svg = '<svg viewBox="0 0 120 64" aria-hidden="true"><path d="M4 8H116M4 32H116M4 56H116" stroke="#E2D6BF" stroke-width="1" stroke-dasharray="3 4"/><path d="' + t.d + '" fill="none" stroke="#B3261E" stroke-width="5" stroke-linecap="round"/></svg>';
+    b.insertAdjacentHTML('afterbegin', svg);
+    var n = el('span', 'en', t.name); n.style.marginTop = '6px'; n.style.fontSize = '12.5px';
+    b.appendChild(n);
+    toneGrid.appendChild(b);
+  });
+
+  var phraseGrid = document.getElementById('phraseGrid');
+  phrases.forEach(function (p) { phraseGrid.appendChild(sayCard(p[0], p[1], p[2])); });
+
+  var numGrid = document.getElementById('numGrid');
+  nums.forEach(function (n, i) {
+    var b = sayCard(n[0], n[1], String(i + 1), 'num');
+    b.querySelector('.en').className = 'en digit';
+    numGrid.appendChild(b);
+  });
+
+  // Quiz
+  var body = document.getElementById('quizBody');
+  var scoreText = document.getElementById('scoreText');
+  function renderQuiz() {
+    var score = 0, done = 0;
+    body.innerHTML = '';
+    scoreText.textContent = 'Score: 0 / ' + quiz.length;
+    quiz.forEach(function (item, qi) {
+      var box = el('div', 'q');
+      box.appendChild(el('p', null, (qi + 1) + '. ' + item.q));
+      var opts = el('div', 'opts');
+      item.o.forEach(function (text, oi) {
+        var b = el('button', null, text);
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          Array.prototype.forEach.call(opts.children, function (c, ci) {
+            c.disabled = true;
+            if (ci === item.a) c.classList.add('right');
+          });
+          if (oi === item.a) score++; else b.classList.add('wrong');
+          done++;
+          scoreText.textContent = 'Score: ' + score + ' / ' + quiz.length +
+            (done === quiz.length ? (score === quiz.length ? ' — 太好了！Excellent!' : ' — 加油！Keep going!') : '');
+        });
+        opts.appendChild(b);
+      });
+      box.appendChild(opts);
+      body.appendChild(box);
+    });
+  }
+  document.getElementById('retry').addEventListener('click', renderQuiz);
+  renderQuiz();
+})();
+</script>
+</body>
+</html>
