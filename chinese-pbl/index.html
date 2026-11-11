@@ -129,19 +129,43 @@
   .fest .zh { font-family: var(--han); font-size: 28px; font-weight: 700; color: var(--red); }
   .fest .py { font-size: 14px; color: var(--ink-soft); margin-bottom: 8px; display: block; }
 
-  /* Quiz */
-  .quiz { max-width: 720px; }
-  .q { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 14px; }
-  .q p { font-weight: 600; margin-bottom: 12px; }
-  .opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .opts button { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; text-align: left; }
-  .opts button:hover:not(:disabled) { border-color: var(--red); }
-  .opts button:disabled { cursor: default; }
-  .opts .right { background: #E5F3EA; border-color: var(--ok); color: #1D5A37; font-weight: 600; }
-  .opts .wrong { background: #FBE7E4; border-color: var(--red); color: var(--red-deep); }
-  .score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 20px; font-family: var(--serif); font-size: 20px; font-weight: 700; }
-  .btn { background: var(--red); color: var(--paper); border: 0; border-radius: 999px; padding: 10px 20px; font-family: var(--sans); font-size: 15px; font-weight: 600; }
-  .btn:hover { background: var(--red-deep); }
+  /* Anime heroes */
+  #anime { background: radial-gradient(1200px 500px at 50% 0%, #3A1512 0%, #1D1A17 60%); color: var(--paper); border-bottom: 0; }
+  #anime .head .han { color: #FF8A7A; }
+  #anime .sub, #anime .hint { color: #CFC4B2; }
+  .heroes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; perspective: 1200px; }
+  .float { animation: bob 5s ease-in-out infinite; transform-style: preserve-3d; }
+  .float:nth-child(2) { animation-delay: -1.2s; }
+  .float:nth-child(3) { animation-delay: -2.5s; }
+  .float:nth-child(4) { animation-delay: -3.7s; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotateY(-9deg) rotateX(3deg); }
+    50% { transform: translateY(-12px) rotateY(9deg) rotateX(-3deg); }
+  }
+  .tilt { transform-style: preserve-3d; transition: transform .25s ease-out; cursor: pointer; border-radius: 20px; }
+  .flip { position: relative; aspect-ratio: 3 / 4.3; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, 1.3, .5, 1); }
+  .tilt.flipped .flip { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; border-radius: 20px; overflow: visible;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding: 18px 14px; text-align: center;
+    background: linear-gradient(160deg, var(--c1), var(--c2));
+    border: 1px solid rgba(255, 255, 255, .25);
+    box-shadow: 0 30px 50px -25px rgba(0, 0, 0, .9), inset 0 0 0 5px rgba(255, 255, 255, .08);
+  }
+  .face.back { transform: rotateY(180deg); justify-content: center; gap: 6px; }
+  .face svg { position: absolute; left: 6%; top: 3%; width: 88%; transform: translateZ(55px); filter: drop-shadow(0 14px 12px rgba(0, 0, 0, .45)); }
+  .face .ring { position: absolute; left: 50%; top: 36%; width: 78%; aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%) translateZ(15px); background: radial-gradient(circle, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 68%); }
+  .face .nm { transform: translateZ(40px); font-family: var(--serif); font-weight: 700; font-size: 20px; color: #fff; text-shadow: 0 2px 8px rgba(0, 0, 0, .6); }
+  .face .from { transform: translateZ(28px); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .85); }
+  .back .zh { transform: translateZ(50px); font-family: var(--han); font-size: clamp(26px, 3vw, 36px); font-weight: 700; color: #fff; line-height: 1.2; text-shadow: 0 3px 10px rgba(0, 0, 0, .5); }
+  .back .py { transform: translateZ(35px); color: #FFE2A8; font-weight: 600; }
+  .back .word { transform: translateZ(25px); margin-top: 10px; padding: 8px 12px; border-radius: 12px; background: rgba(0, 0, 0, .3); color: #fff; font-size: 14.5px; }
+  .back .word b { font-family: var(--han); font-size: 20px; display: block; }
+  .back .show { transform: translateZ(20px); font-size: 12.5px; color: rgba(255, 255, 255, .85); margin-top: 6px; }
+  .back .show span { font-family: var(--han); }
 
   footer { background: var(--ink); color: #D9CFBF; padding-block: 44px; text-align: center; }
   footer .han { font-size: 30px; color: var(--paper); font-weight: 700; }
@@ -153,16 +177,25 @@
     .bigchar { width: 200px; font-size: 120px; }
     .g4, .g3 { grid-template-columns: repeat(2, 1fr); }
     .g5 { grid-template-columns: repeat(3, 1fr); }
+    .heroes { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .face { padding: 12px 8px; }
+    .face .nm { font-size: 17px; }
+    .face .from { font-size: 11px; }
+    .back .zh { font-size: 23px; }
+    .back .py { font-size: 14px; line-height: 1.3; }
+    .back .word { margin-top: 4px; padding: 6px 8px; font-size: 13px; line-height: 1.35; }
+    .back .show { font-size: 11.5px; margin-top: 2px; line-height: 1.3; }
     section { padding-block: 52px; }
   }
   @media (max-width: 520px) {
     .brand span:last-child { display: none; }
-    .g3, .opts { grid-template-columns: 1fr; }
+    .g3 { grid-template-columns: 1fr; }
     .g5 { grid-template-columns: repeat(2, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .say { transition: none; }
+    .say, .tilt, .flip { transition: none; }
+    .float { animation: none; }
   }
 </style>
 </head>
@@ -177,7 +210,7 @@
       <a href="#phrases">Phrases</a>
       <a href="#numbers">Numbers</a>
       <a href="#culture">Culture</a>
-      <a href="#quiz">Quiz</a>
+      <a href="#anime">Anime</a>
     </div>
   </div>
 </nav>
@@ -264,14 +297,12 @@
   </div>
 </section>
 
-<section id="quiz">
+<section id="anime">
   <div class="wrap">
-    <div class="head"><span class="han" lang="zh">小测验</span><h2>Quick quiz</h2></div>
-    <p class="sub">Check what you remember from this page.</p>
-    <div class="quiz">
-      <div id="quizBody"></div>
-      <div class="score"><span id="scoreText">Score: 0 / 5</span><button class="btn" id="retry" type="button">Try again</button></div>
-    </div>
+    <div class="head"><span class="han" lang="zh">动漫英雄</span><h2>Anime heroes in Chinese</h2></div>
+    <p class="sub">Anime (<span class="han" lang="zh">动漫</span>, dòngmàn) is hugely popular in China, and every hero has a Chinese name. Move over a card to tilt it, and tap it to flip and hear the name.</p>
+    <div class="heroes" id="heroGrid"></div>
+    <p class="hint">Character drawings are simple fan-style sketches made for this project. All characters belong to their original creators.</p>
   </div>
 </section>
 
@@ -311,12 +342,11 @@
     ['一', 'yī'], ['二', 'èr'], ['三', 'sān'], ['四', 'sì'], ['五', 'wǔ'],
     ['六', 'liù'], ['七', 'qī'], ['八', 'bā'], ['九', 'jiǔ'], ['十', 'shí']
   ];
-  var quiz = [
-    { q: 'What does 谢谢 (xièxie) mean?', o: ['Hello', 'Thank you', 'Goodbye', 'Sorry'], a: 1 },
-    { q: 'How many main tones does Mandarin have, besides the neutral tone?', o: ['Two', 'Three', 'Four', 'Six'], a: 2 },
-    { q: 'Which character is the number 5?', o: ['三', '五', '八', '十'], a: 1 },
-    { q: 'What is eaten at the Mid-Autumn Festival?', o: ['Mooncakes', 'Dumplings', 'Noodles', 'Spring rolls'], a: 0 },
-    { q: '马 (mǎ, 3rd tone) means…', o: ['Mother', 'Hemp', 'To scold', 'Horse'], a: 3 }
+  var heroes = [
+    { id: 'gojo', nm: 'Gojo Satoru', from: 'Jujutsu Kaisen', zh: '五条悟', py: 'Wǔtiáo Wù', show: '咒术回战', showPy: 'Zhòushù Huízhàn', w: '最强', wPy: 'zuì qiáng', wEn: 'the strongest', c1: '#3F7BEA', c2: '#1B1B4D' },
+    { id: 'naruto', nm: 'Naruto Uzumaki', from: 'Naruto', zh: '漩涡鸣人', py: 'Xuánwō Míngrén', show: '火影忍者', showPy: 'Huǒyǐng Rěnzhě', w: '忍者', wPy: 'rěnzhě', wEn: 'ninja', c1: '#FF9A2E', c2: '#B5340F' },
+    { id: 'thorfinn', nm: 'Thorfinn', from: 'Vinland Saga', zh: '托尔芬', py: 'Tuō’ěrfēn', show: '冰海战记', showPy: 'Bīnghǎi Zhànjì', w: '战士', wPy: 'zhànshì', wEn: 'warrior', c1: '#4E9A86', c2: '#173A40' },
+    { id: 'aizen', nm: 'Aizen Sōsuke', from: 'Bleach', zh: '蓝染惣右介', py: 'Lánrǎn Zǒngyòujiè', show: '死神', showPy: 'Sǐshén', w: '队长', wPy: 'duìzhǎng', wEn: 'captain', c1: '#8B5FD1', c2: '#2A1548' }
   ];
 
   function el(tag, cls, text) {
@@ -376,38 +406,100 @@
     numGrid.appendChild(b);
   });
 
-  // Quiz
-  var body = document.getElementById('quizBody');
-  var scoreText = document.getElementById('scoreText');
-  function renderQuiz() {
-    var score = 0, done = 0;
-    body.innerHTML = '';
-    scoreText.textContent = 'Score: 0 / ' + quiz.length;
-    quiz.forEach(function (item, qi) {
-      var box = el('div', 'q');
-      box.appendChild(el('p', null, (qi + 1) + '. ' + item.q));
-      var opts = el('div', 'opts');
-      item.o.forEach(function (text, oi) {
-        var b = el('button', null, text);
-        b.type = 'button';
-        b.addEventListener('click', function () {
-          Array.prototype.forEach.call(opts.children, function (c, ci) {
-            c.disabled = true;
-            if (ci === item.a) c.classList.add('right');
-          });
-          if (oi === item.a) score++; else b.classList.add('wrong');
-          done++;
-          scoreText.textContent = 'Score: ' + score + ' / ' + quiz.length +
-            (done === quiz.length ? (score === quiz.length ? ' — 太好了！Excellent!' : ' — 加油！Keep going!') : '');
-        });
-        opts.appendChild(b);
-      });
-      box.appendChild(opts);
-      body.appendChild(box);
-    });
+  // Anime hero cards: simple original sketches, 3D tilt and flip
+  var SKIN = '#F6D3B3';
+  function portrait(id) {
+    var eyes = function (c, ry) {
+      return '<ellipse cx="82" cy="106" rx="5.5" ry="' + ry + '" fill="' + c + '"/><ellipse cx="118" cy="106" rx="5.5" ry="' + ry + '" fill="' + c + '"/>';
+    };
+    var brows = function (c, tilt) {
+      return '<path d="M72 ' + (93 - tilt) + ' L92 ' + (93 + tilt) + ' M108 ' + (93 + tilt) + ' L128 ' + (93 - tilt) + '" stroke="' + c + '" stroke-width="3.5" stroke-linecap="round"/>';
+    };
+    var base = function (cloth) {
+      return '<path d="M26 220 Q28 166 100 160 Q172 166 174 220Z" fill="' + cloth + '"/>' +
+        '<rect x="88" y="132" width="24" height="36" fill="#E9BF9C"/>' +
+        '<ellipse cx="100" cy="102" rx="44" ry="50" fill="' + SKIN + '"/>';
+    };
+    var mouth = function (d) { return '<path d="' + d + '" fill="none" stroke="#7A3B2E" stroke-width="2.5" stroke-linecap="round"/>'; };
+    var p = {
+      gojo: base('#1B1B2A') +
+        '<path d="M60 152 L100 140 L140 152 L142 182 L58 182Z" fill="#232338"/>' +
+        mouth('M90 130 Q100 137 112 128') +
+        '<polygon points="52,96 42,62 60,72 56,36 76,56 84,22 98,50 112,20 122,54 142,34 140,70 158,58 148,96 128,74 100,68 72,74" fill="#F4F6FB"/>' +
+        '<rect x="53" y="92" width="94" height="22" rx="7" fill="#15151C"/>',
+      naruto: base('#F08A24') +
+        '<path d="M70 164 L100 186 L130 164 L122 158 L100 172 L78 158Z" fill="#26324F"/>' +
+        eyes('#2F7FD8', 6.5) + brows('#C99A1A', -1) + mouth('M86 126 Q100 140 114 126') +
+        '<path d="M60 112 h13 M59 119 h13 M61 126 h12 M127 112 h13 M128 119 h13 M127 126 h12" stroke="#B88463" stroke-width="2" stroke-linecap="round"/>' +
+        '<polygon points="52,86 38,62 58,68 52,38 74,56 82,28 98,52 114,26 124,54 146,38 142,68 162,62 148,86 100,74" fill="#FFD23F"/>' +
+        '<rect x="54" y="76" width="92" height="13" fill="#26324F"/>' +
+        '<rect x="76" y="73" width="48" height="19" rx="3" fill="#C9CED6"/>' +
+        '<path d="M100 78 a5 5 0 1 1 -5 5" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>',
+      thorfinn: base('#6B4A2E') +
+        '<path d="M52 178 Q100 150 148 178 Q100 196 52 178Z" fill="#B49C78"/>' +
+        eyes('#6A4A2A', 5) + brows('#8C6E36', 3) + mouth('M90 130 H110') +
+        '<path d="M124 116 l10 8" stroke="#C58E78" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<path d="M52 108 Q42 46 100 44 Q158 46 148 108 L140 84 L129 98 L118 78 L106 96 L94 76 L84 98 L72 82 L62 100Z" fill="#C9A45C"/>',
+      aizen: base('#F2F0EA') +
+        '<polygon points="100,206 82,163 118,163" fill="#22222B"/>' +
+        eyes('#5A3A22', 3.6) + brows('#4A2E1A', 1) + mouth('M90 128 Q102 134 114 125') +
+        '<path d="M55 102 Q48 46 100 44 Q152 46 145 102 Q140 68 100 64 Q60 68 55 102Z" fill="#5A3A22"/>' +
+        '<path d="M100 60 Q114 80 105 100" fill="none" stroke="#5A3A22" stroke-width="4.5" stroke-linecap="round"/>'
+    };
+    return '<svg viewBox="0 0 200 220" aria-hidden="true">' + p[id] + '</svg>';
   }
-  document.getElementById('retry').addEventListener('click', renderQuiz);
-  renderQuiz();
+
+  var heroGrid = document.getElementById('heroGrid');
+  heroes.forEach(function (h) {
+    var wrap = el('div', 'float');
+    var tilt = el('div', 'tilt');
+    tilt.tabIndex = 0;
+    tilt.setAttribute('role', 'button');
+    tilt.setAttribute('aria-label', h.nm + ' — flip to see the Chinese name ' + h.py);
+    tilt.style.setProperty('--c1', h.c1);
+    tilt.style.setProperty('--c2', h.c2);
+    var flip = el('div', 'flip');
+
+    var front = el('div', 'face front');
+    front.appendChild(el('div', 'ring'));
+    front.insertAdjacentHTML('beforeend', portrait(h.id));
+    front.appendChild(el('div', 'nm', h.nm));
+    front.appendChild(el('div', 'from', h.from));
+
+    var back = el('div', 'face back');
+    var z = el('div', 'zh', h.zh); z.lang = 'zh';
+    back.appendChild(z);
+    back.appendChild(el('div', 'py', h.py));
+    var w = el('div', 'word');
+    var wb = el('b', null, h.w); wb.lang = 'zh';
+    w.appendChild(wb);
+    w.appendChild(document.createTextNode(h.wPy + ' · ' + h.wEn));
+    back.appendChild(w);
+    var sh = el('div', 'show');
+    var ss = el('span', null, h.show); ss.lang = 'zh';
+    sh.appendChild(ss);
+    sh.appendChild(document.createTextNode(' · ' + h.showPy));
+    back.appendChild(sh);
+
+    flip.appendChild(front); flip.appendChild(back);
+    tilt.appendChild(flip); wrap.appendChild(tilt); heroGrid.appendChild(wrap);
+
+    function toggle() {
+      var on = tilt.classList.toggle('flipped');
+      if (on) speak(h.zh, tilt);
+    }
+    tilt.addEventListener('click', toggle);
+    tilt.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+    tilt.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      var r = tilt.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+      tilt.style.transform = 'rotateY(' + (x * 30).toFixed(1) + 'deg) rotateX(' + (-y * 24).toFixed(1) + 'deg) scale(1.04)';
+    });
+    tilt.addEventListener('pointerleave', function () { tilt.style.transform = ''; });
+  });
 })();
 </script>
 </body>
